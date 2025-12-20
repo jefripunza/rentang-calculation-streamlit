@@ -1,0 +1,62 @@
+/* cyberpunk.css */
+
+/* 1. Latar belakang & warna dasar */
+body {
+    background: radial-gradient(circle at 50% 30%, #0a0a0a, #010101);
+    color: #e0e0e0;
+    font-family: 'Orbitron', sans-serif; /* Pastikan font sudah dimuat */
+}
+
+/* 2. Judul utama dengan efek glitch */
+h1, .stTitle {
+    position: relative;
+    font-size: 3rem;
+    color: #ff00ff;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    animation: glitch 3s infinite;
+}
+
+/* 3. Link & tombol neon */
+a, .stButton > button {
+    background: linear-gradient(45deg, #00ffff, #ff00ff);
+    color: #111;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    font-weight: bold;
+    text-shadow: 0 0 5px #00ffff, 0 0 10px #ff00ff;
+    transition: transform 0.2s ease;
+}
+
+a:hover, .stButton > button:hover {
+    transform: scale(1.05);
+    text-shadow: 0 0 10px #00ffff, 0 0 20px #ff00ff;
+}
+
+/* 4. Input text dengan border neon */
+input, textarea, .stTextInput > div > div > div > input, .stTextArea > div > div > div > textarea {
+    background: transparent;
+    border: 2px solid #00ffff;
+    color: #fff;
+    padding: 8px 12px;
+    font-size: 1rem;
+    border-radius: 3px;
+}
+
+/* 5. Efek glitch (keyframes) */
+@keyframes glitch {
+    0%   { clip: rect(0, 9999px, 0, 0); transform: translate(0); }
+    20%  { clip: rect(10px, 9999px, 70px, 0); transform: translate(-2px, -2px); }
+    40%  { clip: rect(0, 9999px, 0, 0); transform: translate(2px, 2px); }
+    60%  { clip: rect(40px, 9999px, 100px, 0); transform: translate(-2px, -2px); }
+    80%  { clip: rect(60px, 9999px, 120px, 0); transform: translate(2px, 2px); }
+    100% { clip: rect(0, 9999px, 0, 0); transform: translate(0); }
+}
+
+/* 6. Footer minimal */
+footer {
+    color: #555;
+    font-size: 0.9rem;
+    margin-top: 30px;
+}

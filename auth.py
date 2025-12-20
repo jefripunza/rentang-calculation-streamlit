@@ -1,4 +1,5 @@
 import streamlit as st
+import requests
 
 PASS = "rentang@uyee"
 
@@ -12,9 +13,7 @@ def check_auth():
     # ---------------------------------
     st.title("🔐 Aplikasi Perencanaan Irigasi")
     st.write("### Silakan Masukkan Password untuk melanjutkan")
-
     password = st.text_input("Password", type="password", key="auth_password")
-
     if st.button("Login"):
         # nembah DSS
         if password == PASS:
@@ -23,3 +22,5 @@ def check_auth():
         else:
             st.error("❌ Password salah")
     return st.session_state.get("logged_in", False)
+
+
