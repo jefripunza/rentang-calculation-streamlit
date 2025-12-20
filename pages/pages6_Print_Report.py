@@ -7,6 +7,15 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 import altair as alt
+from auth import check_auth
+from menu import render_sidebar
+
+# ========================================
+# ===== Autentikasi Basic Auth ===========
+# ========================================
+if not check_auth():
+    st.stop()
+render_sidebar()
 
 # ========================================
 # 共通設定・5day 系

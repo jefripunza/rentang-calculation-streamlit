@@ -2,6 +2,15 @@ from pathlib import Path
 import streamlit as st
 import pandas as pd
 import numpy as np
+from auth import check_auth
+from menu import render_sidebar
+
+# ========================================
+# ===== Autentikasi Basic Auth ===========
+# ========================================
+if not check_auth():
+    st.stop()
+render_sidebar()
 
 st.markdown(
     """

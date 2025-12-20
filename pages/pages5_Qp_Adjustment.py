@@ -7,6 +7,15 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 import altair as alt
+from auth import check_auth
+from menu import render_sidebar
+
+# ========================================
+# ===== Autentikasi Basic Auth ===========
+# ========================================
+if not check_auth():
+    st.stop()
+render_sidebar()
 
 def _parse_golongan_no_simple(g) -> int | None:
     """文字列から Golongan 番号（1/2/3）だけを取り出す簡易関数。"""

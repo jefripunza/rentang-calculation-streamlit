@@ -9,6 +9,15 @@ import re
 import numpy as np
 import pandas as pd
 import streamlit as st
+from auth import check_auth
+from menu import render_sidebar
+
+# ========================================
+# ===== Autentikasi Basic Auth ===========
+# ========================================
+if not check_auth():
+    st.stop()
+render_sidebar()
 
 # ---------- 共通：CSV 状態表示用スタイル（読み込み済み / アップロード必要） ----------
 st.markdown(

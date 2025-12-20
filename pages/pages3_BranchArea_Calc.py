@@ -5,6 +5,15 @@ from collections import defaultdict
 import numpy as np
 import re
 import datetime as dt
+from auth import check_auth
+from menu import render_sidebar
+
+# ========================================
+# ===== Autentikasi Basic Auth ===========
+# ========================================
+if not check_auth():
+    st.stop()
+render_sidebar()
 
 # ========================================
 # Paths: project root, CSV folder

@@ -5,6 +5,15 @@ import re
 import pandas as pd
 import streamlit as st
 import numpy as np
+from auth import check_auth
+from menu import render_sidebar
+
+# ========================================
+# ===== Autentikasi Basic Auth ===========
+# ========================================
+if not check_auth():
+    st.stop()
+render_sidebar()
 
 st.markdown(
     """

@@ -3,6 +3,15 @@ from pathlib import Path
 
 import pandas as pd
 import streamlit as st
+from auth import check_auth
+from menu import render_sidebar
+
+# ========================================
+# ===== Autentikasi Basic Auth ===========
+# ========================================
+if not check_auth():
+    st.stop()
+render_sidebar()
 
 # ========================================
 # Paths: project root, CSV folder, IMG folder, AUDIO folder
@@ -18,65 +27,65 @@ AUDIO_DIR = BASE_DIR / "audio" # [Added] Folder for audio files (create if neces
 st.set_page_config(page_title="Irrigation Tool", layout="wide")
 
 # ---------- Common: table renderer with borders & 1-based row index ----------
-def render_table(df: pd.DataFrame, header_bg: str = "#e5f0ff", caption: str | None = None):
-    if caption:
-        st.caption(caption)
-    if df is None or df.empty:
-        st.write("(no data)")
-        return
+# def render_table(df: pd.DataFrame, header_bg: str = "#e5f0ff", caption: str | None = None):
+#     if caption:
+#         st.caption(caption)
+#     if df is None or df.empty:
+#         st.write("(no data)")
+#         return
 
-    df_show = df.copy()
-    df_show.index = range(1, len(df_show) + 1)  # 1-based index
+#     df_show = df.copy()
+#     df_show.index = range(1, len(df_show) + 1)  # 1-based index
 
-    styler = (
-        df_show
-        .style
-        .set_properties(**{
-            "text-align": "center",
-            "padding": "2px 4px",
-            "font-size": "12px",
-            "white-space": "nowrap",
-        })
-        .set_table_styles([
-            {"selector": "th.col_heading",
-             "props": [("background-color", header_bg),
-                       ("font-weight", "bold"),
-                       ("border", "1px solid #999"),
-                       ("padding", "2px 4px"),
-                       ("white-space", "nowrap"),
-                       ("position", "sticky"),
-                       ("top", "0"),
-                       ("z-index", "2")]},
-            {"selector": "th.row_heading",
-             "props": [("background-color", "#f5f5f5"),
-                       ("font-weight", "bold"),
-                       ("border", "1px solid #999"),
-                       ("padding", "2px 4px"),
-                       ("white-space", "nowrap")]},
-            {"selector": "th.blank",
-             "props": [("border", "1px solid #999"),
-                       ("padding", "2px 4px")]},
-            {"selector": "td",
-             "props": [("border", "1px solid #999"),
-                       ("padding", "2px 4px"),
-                       ("white-space", "nowrap")]},
-        ])
-    )
+#     styler = (
+#         df_show
+#         .style
+#         .set_properties(**{
+#             "text-align": "center",
+#             "padding": "2px 4px",
+#             "font-size": "12px",
+#             "white-space": "nowrap",
+#         })
+#         .set_table_styles([
+#             {"selector": "th.col_heading",
+#              "props": [("background-color", header_bg),
+#                        ("font-weight", "bold"),
+#                        ("border", "1px solid #999"),
+#                        ("padding", "2px 4px"),
+#                        ("white-space", "nowrap"),
+#                        ("position", "sticky"),
+#                        ("top", "0"),
+#                        ("z-index", "2")]},
+#             {"selector": "th.row_heading",
+#              "props": [("background-color", "#f5f5f5"),
+#                        ("font-weight", "bold"),
+#                        ("border", "1px solid #999"),
+#                        ("padding", "2px 4px"),
+#                        ("white-space", "nowrap")]},
+#             {"selector": "th.blank",
+#              "props": [("border", "1px solid #999"),
+#                        ("padding", "2px 4px")]},
+#             {"selector": "td",
+#              "props": [("border", "1px solid #999"),
+#                        ("padding", "2px 4px"),
+#                        ("white-space", "nowrap")]},
+#         ])
+#     )
 
-    html = styler.to_html()
-    html = (
-        '<div style="overflow-x:auto; text-align:left;">'
-        f"{html}"
-        "</div>"
-    )
-    st.markdown(html, unsafe_allow_html=True)
+#     html = styler.to_html()
+#     html = (
+#         '<div style="overflow-x:auto; text-align:left;">'
+#         f"{html}"
+#         "</div>"
+#     )
+#     st.markdown(html, unsafe_allow_html=True)
 
 
-def find_latest_csv(pattern_func):
-    files = [p for p in CSV_DIR.glob("*.csv") if pattern_func(p)]
-    if not files:
-        return None
-    return max(files, key=lambda p: p.stat().st_mtime)
+# def find_latest_csv(pattern_func):
+#     files = [p for p in CSV_DIR.glob("*.csv") if pattern_func(p)]
+#     if not files:
+#         return None
+#     return max(files, key=lambda p: p.stat().st_mtime)
 
 
 # ========================================
