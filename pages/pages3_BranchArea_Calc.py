@@ -21,7 +21,7 @@ render_sidebar()
 BASE_DIR = Path(__file__).resolve().parent.parent
 CSV_DIR = BASE_DIR / "csv"
 
-st.title("Page3 – Branch Area Aggregation & Canal Filter")
+st.title("Branch Area Aggregation & Canal Filter")
 
 st.markdown("""
 This page reads a **water system network sheet** (parent–child nodes) from an uploaded CSV,

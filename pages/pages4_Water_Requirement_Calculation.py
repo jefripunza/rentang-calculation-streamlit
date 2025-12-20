@@ -185,7 +185,7 @@ def date_to_5day_index(d: dt.date) -> int:
 # ========================================
 # Title
 # ========================================
-st.title("Page4 – Water Requirement Calculation (Qp)")
+st.title("Water Requirement Calculation (Qp)")
 
 st.markdown("""
 This page:

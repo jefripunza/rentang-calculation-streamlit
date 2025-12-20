@@ -1518,7 +1518,7 @@ def compute_qp_from_nfr_for_df(
 # ========================================
 # Title
 # ========================================
-st.title("Page5 – Water Requirement Adjustment (Qp vs Adjusted Qp)")
+st.title("Water Requirement Adjustment (Qp vs Adjusted Qp)")
 
 st.markdown("""
 This page compares **planned Qp** from Page4 with **shifted Qp** by 5-day steps.
