@@ -1,0 +1,56 @@
+Bank,Golongan,ID,Nama_Stasi,Ratio
+Left,Golongan 1,102,Bondan,13.00%
+Left,Golongan 1,105,Cikedung,1.60%
+Left,Golongan 1,107,Jatibarang,12.80%
+Left,Golongan 1,110,Kertasemaya,2.40%
+Left,Golongan 1,116,Sukadana,26.30%
+Left,Golongan 1,119,Tugu,27.00%
+Left,Golongan 1,120,Ujungaris,16.10%
+Left,Golongan 1,303,Rentang,0.80%
+Left,Golongan 2,101,Bangkir,3.00%
+Left,Golongan 2,104,Cidempet,14.90%
+Left,Golongan 2,105,Cikedung,16.20%
+Left,Golongan 2,107,Jatibarang,0.30%
+Left,Golongan 2,112,Lohbener,24.10%
+Left,Golongan 2,113,Losarang,20.30%
+Left,Golongan 2,118,Terisi,5.60%
+Left,Golongan 2,119,Tugu,4.70%
+Left,Golongan 2,120,Ujungaris,10.70%
+Left,Golongan 3,101,Bangkir,4.80%
+Left,Golongan 3,103,Bulak,6.80%
+Left,Golongan 3,104,Cidempet,26.80%
+Left,Golongan 3,106,Indramayu,24.90%
+Left,Golongan 3,113,Losarang,25.80%
+Left,Golongan 3,118,Terisi,10.70%
+Right,Golongan 1,102,Bondan,6.20%
+Right,Golongan 1,108,Juntinyuat,10.40%
+Right,Golongan 1,109,Kedokan Bunder,23.90%
+Right,Golongan 1,110,Kertasemaya,8.00%
+Right,Golongan 1,111,Krangkeng,15.40%
+Right,Golongan 1,115,Sudimampir Lor,0.00%
+Right,Golongan 1,116,Sukadana,4.70%
+Right,Golongan 1,202,Bunder,14.70%
+Right,Golongan 1,204,Gegesik,6.10%
+Right,Golongan 1,207,Luwung Kencana,10.70%
+Right,Golongan 2,108,Juntinyuat,6.30%
+Right,Golongan 2,109,Kedokan Bunder,7.90%
+Right,Golongan 2,110,Kertasemaya,9.00%
+Right,Golongan 2,111,Krangkeng,16.90%
+Right,Golongan 2,114,Sudikampiran,8.20%
+Right,Golongan 2,115,Sudimampir Lor,10.30%
+Right,Golongan 2,202,Bunder,3.40%
+Right,Golongan 2,203,Cangkring,22.10%
+Right,Golongan 2,204,Gegesik,16.00%
+Right,Golongan 3,101,Bangkir,5.40%
+Right,Golongan 3,106,Indramayu,6.10%
+Right,Golongan 3,107,Jatibarang,5.50%
+Right,Golongan 3,108,Juntinyuat,2.80%
+Right,Golongan 3,110,Kertasemaya,2.10%
+Right,Golongan 3,111,Krangkeng,3.00%
+Right,Golongan 3,112,Lohbener,2.90%
+Right,Golongan 3,114,Sudikampiran,16.20%
+Right,Golongan 3,115,Sudimampir Lor,17.30%
+Right,Golongan 3,120,Ujungaris,3.00%
+Right,Golongan 3,202,Bunder,0.10%
+Right,Golongan 3,203,Cangkring,11.80%
+Right,Golongan 3,204,Gegesik,23.60%
