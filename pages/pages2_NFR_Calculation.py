@@ -154,14 +154,6 @@ def date_to_5day_id(d: dt.date) -> int:
     """
     Convert a calendar date to 5Day_ID (1..72) in a water year
     starting in November.
-
-    Month steps:
-      Step 1: day  1– 5
-      Step 2: day  6–10
-      Step 3: day 11–15
-      Step 4: day 16–20
-      Step 5: day 21–25
-      Step 6: day 26–end of month
     """
     m = d.month
     try:
@@ -188,27 +180,21 @@ def date_to_5day_id(d: dt.date) -> int:
 def five_day_id_to_date(water_year_start: int, five_id: int) -> dt.date:
     """
     Map 5Day_ID (1..72) back to a calendar date, given a water-year start.
-
-    - water_year_start: the year in which the water year starts in November
-                        (Nov–Dec belong to this year, Jan–Oct belong to +1 year)
-    - five_id: 1..72
     """
-    season_idx = (five_id - 1) // 6          # 0..11
-    month = water_month_order[season_idx]     # 11,12,1..10
-    step = ((five_id - 1) % 6) + 1           # 1..6
+    season_idx = (five_id - 1) // 6
+    month = water_month_order[season_idx]
+    step = ((five_id - 1) % 6) + 1
 
-    # Start day of each 5-day step: 1, 6, 11, 16, 21, 26
     if step <= 5:
         day = (step - 1) * 5 + 1
     else:
         day = 26
 
-    # Nov–Dec -> water_year_start, Jan–Oct -> water_year_start + 1
     year = water_year_start if month >= 11 else water_year_start + 1
     return dt.date(year, month, day)
 
 
-STEP_DAYS = 5.0  # 1 step = 5 days
+STEP_DAYS = 5.0
 
 
 def add_golongan_delay_in_5day_grid(
@@ -218,41 +204,17 @@ def add_golongan_delay_in_5day_grid(
 ) -> dt.date:
     """
     Apply Golongan-wise delay on a 5-day grid rather than on the raw calendar.
-
-    Logic:
-      1. Convert base_date to 5Day_ID (1..72).
-      2. Compute number of 5-day steps per Golongan shift:
-           steps_per_gol = round(DelGol_days / 5)
-      3. For Golongan index k (1,2,3,...), shift by:
-           total_steps = (k - 1) * steps_per_gol
-         (G1: 0 step, G2: +steps_per_gol, G3: +2*steps_per_gol, ...).
-      4. Wrap 5Day_ID within 1..72.
-      5. Convert the shifted 5Day_ID back to a calendar date using the same
-         water year as base_date.
-
-    Example:
-      base_date   = 2025-12-01 (Dec-1 in the water year)
-      delgol_days = 30  → steps_per_gol ≈ 6
-      Gol_idx     = 3   → total_steps = 12 → around Jan-1 in the water year.
     """
-    # 1) base 5Day_ID (1..72)
     base_id = date_to_5day_id(base_date)
-
-    # 2) steps per Golongan
     steps_per_gol = int(round(delgol_days / STEP_DAYS))
     total_steps = max(0, steps_per_gol * (gol_idx - 1))
-
-    # 3) wrap within 1..72
     new_id = ((base_id - 1 + total_steps) % 72) + 1
 
-    # 4) infer water-year start from base_date
-    #    Nov/Dec → base_date.year, Jan–Oct → base_date.year - 1
     if base_date.month >= 11:
         water_year_start = base_date.year
     else:
         water_year_start = base_date.year - 1
 
-    # 5) convert back to date
     return five_day_id_to_date(water_year_start, new_id)
 
 
@@ -267,24 +229,23 @@ This page defines the **input parameters** for the Net Field Water Requirement (
 1. Basic information (LP duration, percolation, water layer replacement, etc.)  
 2. Crop coefficients Kc for MT-1 and MT-3  
 3. Land preparation start dates for MT-1, MT-2, MT-3 (per group)  
-4. Effective rainfall (Re) from the Rain & Thiessen page  
-5. ETo (mm/day, **Jatiwangi Station**) for each 5-day step  
-6. LP calculation  
-7. LP / P / WLr / ETc distributions per group  
-8. NFR per group and season (exported as `NFR_5Day.csv` in **L/s/ha**)  
+4. ETo (mm/day, **Jatiwangi Station**) for each 5-day step  
+5. LP calculation  
+6. LP / P / WLr / ETc / Re / NFR distributions per group  
+7. NFR per group and season (exported as `NFR_5Day.csv` in **L/s/ha**)  
 """)
 
 st.markdown(
     """
     <style>
-    /* 4–6 の expander を目立たせる（全ての expander に適用） */
+    /* 4–5 の expander を目立たせる（全ての expander に適用） */
     div[data-testid="stExpander"] > details > summary {
-        font-size: 1.1rem;      /* 少し大きめ */
-        font-weight: 700;       /* 太字 */
+        font-size: 1.1rem;
+        font-weight: 700;
     }
     div[data-testid="stExpander"] {
         border: 1px solid #60a5fa;
-        background-color: #e0f2fe;  /* 薄い青 */
+        background-color: #e0f2fe;
         border-radius: 4px;
         margin-top: 0.5rem;
         margin-bottom: 0.5rem;
@@ -328,7 +289,6 @@ if "basic_edited" not in st.session_state:
 if "basic_draft" not in st.session_state:
     st.session_state["basic_draft"] = st.session_state["basic_edited"].copy()
 
-# --- Editing table (center-ish, buttons 近接) ---
 st.markdown("**Editing table – Basic parameters (draft)**")
 basic_draft = st.data_editor(
     st.session_state["basic_draft"],
@@ -336,7 +296,7 @@ basic_draft = st.data_editor(
     hide_index=True,
     key="basic_editor",
     width="content",
-    height=480,  # ★ 全行が入るくらいの高さを確保（好みで調整可）
+    height=480,
     column_config={
         "Variable": st.column_config.Column("Variable", disabled=True),
         "Item": st.column_config.Column("Item", disabled=True),
@@ -363,20 +323,16 @@ def _reset_season_states():
 
 with col_b1:
     if st.button("Reset", key="btn_basic_reset"):
-        # Basic を初期値に戻す
         st.session_state["basic_edited"] = st.session_state["basic_df_default"].copy()
         st.session_state["basic_draft"]  = st.session_state["basic_df_default"].copy()
-        # Season Start Dates も作り直す
         _reset_season_states()
         st.success("Basic parameters reset to defaults (season dates will be re-initialized).")
         st.rerun()
 
 with col_b2:
     if st.button("Apply", key="btn_basic_apply"):
-        # Basic を新しい値で確定
         st.session_state["basic_edited"] = basic_draft.copy()
         st.session_state["basic_draft"]  = basic_draft.copy()
-        # DelGol などが変わった場合に備えて Season Start Dates を作り直す
         _reset_season_states()
         st.success("Basic parameters applied. Season start dates will be recalculated.")
         st.rerun()
@@ -384,20 +340,13 @@ with col_b2:
 
 basic_edited = st.session_state["basic_edited"]
 
-# --- Calculation table – Basic parameters (used for 6–8) ---
-st.markdown("**Calculation table – Basic parameters (used for 6–8)**")
+st.markdown("**Calculation table – Basic parameters (used for 5–7)**")
 st.caption("Cells in yellow are different from defaults (Value column).")
 
-# 行番号 1 始まり
 basic_preview = st.session_state["basic_draft"].copy()
 basic_preview.index = range(1, len(basic_preview) + 1)
 
 def basic_value_highlight(col: pd.Series):
-    """
-    Basic Information の Value 列だけを比較して、
-    デフォルトと違うセルを黄色にする。
-    axis=0（列方向）で使う。
-    """
     if col.name != "Value":
         return [""] * len(col)
 
@@ -415,7 +364,7 @@ def basic_value_highlight(col: pd.Series):
 styled_basic = (
     basic_preview
     .style
-    .apply(basic_value_highlight, axis=0)   # 列ごとにハイライト
+    .apply(basic_value_highlight, axis=0)
     .format({"Value": "{:.0f}"})
     .set_properties(**{
         "text-align": "center",
@@ -527,18 +476,13 @@ with col_k2:
 
 kc_edited = st.session_state["kc_edited"]
 
-# --- Calculation table – Crop coefficients (used for 7–8) ---
-st.markdown("**Calculation table – Crop coefficients (used for 7–8)**")
+st.markdown("**Calculation table – Crop coefficients (used for 6–7)**")
 st.caption("Cells in yellow are different from defaults (Value column).")
 
 kc_preview = st.session_state["kc_draft"].copy()
 kc_preview.index = range(1, len(kc_preview) + 1)
 
 def kc_value_highlight(col: pd.Series):
-    """
-    Kc の Value 列だけを比較して、
-    デフォルトと違うセルを黄色にする。
-    """
     if col.name != "Value":
         return [""] * len(col)
 
@@ -608,29 +552,218 @@ Each group (Bank_Golongan) can have its own **start dates** for:
 
 Golongan-wise delay is defined by **DelGol**.
 Later, these dates will be converted into **5Day_ID (1–72, November-start water year)**.
+
+**You can also load these dates from a CSV file.**
 """)
 
-# Basic Information から DurLP, SecShift, DelGol を取得
+# ★★★ 必要な変数を先に定義 ★★★
 basic_vals_init = basic_edited.set_index("Variable")["Value"]
-DurLP_days   = float(basic_vals_init.get("DurLP", 20))     # LP 期間（日数）
-SecShift_days = float(basic_vals_init.get("SecShift", 5))  # Section の開始ずれ
-DelGol_days   = float(basic_vals_init.get("DelGol", 15))   # Golongan 間のずれ（5Day グリッドで解釈）
+DurLP_days   = float(basic_vals_init.get("DurLP", 20))
+SecShift_days = float(basic_vals_init.get("SecShift", 5))
+DelGol_days   = float(basic_vals_init.get("DelGol", 15))
 
-# デフォルト開始日（Golongan1 基準）
 default_mt1 = dt.date(2025, 12, 1)
 default_mt2 = dt.date(2025, 5, 16)
 default_mt3 = dt.date(2025, 9, 6)
+
+# ========== CSV読み込み機能 ==========
+with st.expander("📂 Load Season Start Dates from CSV", expanded=False):
+    st.markdown("""
+    **CSV Format Requirements:**
+    - Required columns: `Group`, `MT1_start`, `MT2_start`, `MT3_start`
+    - Optional columns: `MT3_active`, `MT3_days`
+    - Date format: `YYYY-MM-DD` (e.g., 2025-12-01)
+    - Group names must match exactly (e.g., "Left_Golongan 1")
+    """)
+    
+    season_csv_candidates = sorted(
+        [p for p in CSV_DIR.glob("*.csv") 
+         if any(keyword in p.name.lower() for keyword in ["season", "landprep", "start"])],
+        key=lambda p: p.stat().st_mtime,
+        reverse=True,
+    )
+    
+    if season_csv_candidates:
+        st.caption("**Auto-detected Season Start CSVs in `csv` folder:**")
+        season_labels = [
+            f"{p.name}  (modified: {dt.datetime.fromtimestamp(p.stat().st_mtime).strftime('%Y-%m-%d %H:%M')})"
+            for p in season_csv_candidates
+        ]
+        
+        selected_season_label = st.selectbox(
+            "Select Season Start CSV from folder",
+            options=season_labels,
+            index=0,
+            key="sb_season_from_folder",
+        )
+        selected_season_path = season_csv_candidates[season_labels.index(selected_season_label)]
+        
+        try:
+            season_df_csv = pd.read_csv(selected_season_path)
+            
+            required_cols = {"Group", "MT1_start", "MT2_start", "MT3_start"}
+            if not required_cols.issubset(season_df_csv.columns):
+                st.error(f"❌ CSV must contain columns: {required_cols}\n\nFound: {set(season_df_csv.columns)}")
+            else:
+                season_df_csv["Group"] = season_df_csv["Group"].astype(str).str.strip()
+                season_df_csv["MT1_start"] = pd.to_datetime(season_df_csv["MT1_start"], errors='coerce').dt.date
+                season_df_csv["MT2_start"] = pd.to_datetime(season_df_csv["MT2_start"], errors='coerce').dt.date
+                season_df_csv["MT3_start"] = pd.to_datetime(season_df_csv["MT3_start"], errors='coerce').dt.date
+                
+                if season_df_csv[["MT1_start", "MT2_start", "MT3_start"]].isnull().any().any():
+                    st.error("❌ Some dates could not be parsed. Please use YYYY-MM-DD format.")
+                else:
+                    if "MT3_active" in season_df_csv.columns:
+                        season_df_csv["MT3_active"] = season_df_csv["MT3_active"].astype(bool)
+                    else:
+                        season_df_csv["MT3_active"] = season_df_csv["Group"].apply(
+                            lambda g: group_to_gol_idx.get(g, 1) != 3
+                        )
+                    
+                    if "MT3_days" in season_df_csv.columns:
+                        season_df_csv["MT3_days"] = pd.to_numeric(
+                            season_df_csv["MT3_days"], errors="coerce"
+                        ).fillna(70).astype(int)
+                    else:
+                        season_df_csv["MT3_days"] = season_df_csv["Group"].apply(
+                            lambda g: {1: 70, 2: 60, 3: 0}.get(group_to_gol_idx.get(g, 1), 70)
+                        )
+                    
+                    valid_groups = set(groups)
+                    csv_groups = set(season_df_csv["Group"])
+                    missing = valid_groups - csv_groups
+                    extra = csv_groups - valid_groups
+                    
+                    if missing:
+                        st.warning(f"⚠️ CSV is missing groups: {missing}")
+                    if extra:
+                        st.warning(f"⚠️ CSV contains unknown groups (will be ignored): {extra}")
+                    
+                    season_df_final = []
+                    for g in groups:
+                        if g in csv_groups:
+                            season_df_final.append(season_df_csv[season_df_csv["Group"] == g].iloc[0])
+                        else:
+                            gol_idx = group_to_gol_idx.get(g, 1)
+                            mt3_active = (gol_idx != 3)
+                            mt3_days = {1: 70, 2: 60, 3: 0}.get(gol_idx, 70)
+                            
+                            mt1_start = add_golongan_delay_in_5day_grid(default_mt1, gol_idx, DelGol_days)
+                            mt2_start = add_golongan_delay_in_5day_grid(default_mt2, gol_idx, DelGol_days)
+                            mt3_start = add_golongan_delay_in_5day_grid(default_mt3, gol_idx, DelGol_days)
+                            
+                            season_df_final.append({
+                                "Group": g,
+                                "MT1_start": mt1_start,
+                                "MT2_start": mt2_start,
+                                "MT3_start": mt3_start,
+                                "MT3_active": mt3_active,
+                                "MT3_days": mt3_days,
+                            })
+                    
+                    season_df_final = pd.DataFrame(season_df_final)
+                    st.session_state["landprep_df_draft"] = season_df_final.copy()
+                    
+                    st.success(f"✅ Loaded season start dates from: **{selected_season_path.name}**\n\n"
+                             "Data loaded into draft table. Click **'Apply season dates'** to confirm.")
+                
+        except Exception as e:
+            st.error(f"❌ Failed to load CSV from folder: {e}")
+    else:
+        st.info("No Season Start CSV found in `csv` folder. Use manual upload below.")
+    
+    st.markdown("---")
+    st.caption("**Or upload your own CSV file:**")
+    
+    uploaded_season = st.file_uploader(
+        "Upload cropping_schedule_org.csv Season Start CSV",
+        type=["csv"],
+        key="upload_season_csv",
+        help="CSV must contain: Group, MT1_start, MT2_start, MT3_start (dates in YYYY-MM-DD format)"
+    )
+    
+    if uploaded_season is not None:
+        try:
+            season_df_up = pd.read_csv(uploaded_season)
+            
+            required_cols = {"Group", "MT1_start", "MT2_start", "MT3_start"}
+            if not required_cols.issubset(season_df_up.columns):
+                st.error(f"❌ CSV must contain columns: {required_cols}\n\nFound: {set(season_df_up.columns)}")
+            else:
+                season_df_up["Group"] = season_df_up["Group"].astype(str).str.strip()
+                season_df_up["MT1_start"] = pd.to_datetime(season_df_up["MT1_start"], errors='coerce').dt.date
+                season_df_up["MT2_start"] = pd.to_datetime(season_df_up["MT2_start"], errors='coerce').dt.date
+                season_df_up["MT3_start"] = pd.to_datetime(season_df_up["MT3_start"], errors='coerce').dt.date
+                
+                if season_df_up[["MT1_start", "MT2_start", "MT3_start"]].isnull().any().any():
+                    st.error("❌ Some dates could not be parsed. Please use YYYY-MM-DD format.")
+                else:
+                    if "MT3_active" in season_df_up.columns:
+                        season_df_up["MT3_active"] = season_df_up["MT3_active"].astype(bool)
+                    else:
+                        season_df_up["MT3_active"] = season_df_up["Group"].apply(
+                            lambda g: group_to_gol_idx.get(g, 1) != 3
+                        )
+                    
+                    if "MT3_days" in season_df_up.columns:
+                        season_df_up["MT3_days"] = pd.to_numeric(
+                            season_df_up["MT3_days"], errors="coerce"
+                        ).fillna(70).astype(int)
+                    else:
+                        season_df_up["MT3_days"] = season_df_up["Group"].apply(
+                            lambda g: {1: 70, 2: 60, 3: 0}.get(group_to_gol_idx.get(g, 1), 70)
+                        )
+                    
+                    valid_groups = set(groups)
+                    csv_groups = set(season_df_up["Group"])
+                    missing = valid_groups - csv_groups
+                    extra = csv_groups - valid_groups
+                    
+                    if missing:
+                        st.warning(f"⚠️ CSV is missing groups: {missing}")
+                    if extra:
+                        st.warning(f"⚠️ CSV contains unknown groups (will be ignored): {extra}")
+                    
+                    season_df_final = []
+                    for g in groups:
+                        if g in csv_groups:
+                            season_df_final.append(season_df_up[season_df_up["Group"] == g].iloc[0])
+                        else:
+                            gol_idx = group_to_gol_idx.get(g, 1)
+                            mt3_active = (gol_idx != 3)
+                            mt3_days = {1: 70, 2: 60, 3: 0}.get(gol_idx, 70)
+                            
+                            mt1_start = add_golongan_delay_in_5day_grid(default_mt1, gol_idx, DelGol_days)
+                            mt2_start = add_golongan_delay_in_5day_grid(default_mt2, gol_idx, DelGol_days)
+                            mt3_start = add_golongan_delay_in_5day_grid(default_mt3, gol_idx, DelGol_days)
+                            
+                            season_df_final.append({
+                                "Group": g,
+                                "MT1_start": mt1_start,
+                                "MT2_start": mt2_start,
+                                "MT3_start": mt3_start,
+                                "MT3_active": mt3_active,
+                                "MT3_days": mt3_days,
+                            })
+                    
+                    season_df_final = pd.DataFrame(season_df_final)
+                    st.session_state["landprep_df_draft"] = season_df_final.copy()
+                    
+                    st.success(f"✅ Loaded season start dates from uploaded CSV: **{uploaded_season.name}**\n\n"
+                             "Data loaded into draft table. Click **'Apply season dates'** to confirm.")
+                
+        except Exception as e:
+            st.error(f"❌ Failed to load uploaded CSV: {e}")
+
+st.markdown("---")
 
 # landprep の default / draft / committed
 if "landprep_df_default" not in st.session_state:
     lp_rows = []
     for g in groups:
         gol_idx = group_to_gol_idx.get(g, 1)
-
-        # MT-3 active: Golongan1,2 = True, Golongan3 = False
         mt3_active = (gol_idx != 3)
 
-        # MT-3 の栽培期間の初期値
         if gol_idx == 1:
             mt3_days = 70
         elif gol_idx == 2:
@@ -638,7 +771,6 @@ if "landprep_df_default" not in st.session_state:
         else:
             mt3_days = 0
 
-        # ★ DelGol を 5Day_ID グリッドで解釈して Golongan ごとの開始日を決定
         mt1_start = add_golongan_delay_in_5day_grid(default_mt1, gol_idx, DelGol_days)
         mt2_start = add_golongan_delay_in_5day_grid(default_mt2, gol_idx, DelGol_days)
         mt3_start = add_golongan_delay_in_5day_grid(default_mt3, gol_idx, DelGol_days)
@@ -670,7 +802,6 @@ if "mt3_common" not in st.session_state:
 
 lp_df = st.session_state["landprep_df_draft"]
 
-# --- 上部：共通開始日 3つ（レイアウトは今まで通り） ---
 st.write("**Set common start dates for all groups (Golongan1 base, others shifted by DelGol; can be fine-tuned below)**")
 col_mt1, col_mt2, col_mt3 = st.columns(3)
 
@@ -705,7 +836,6 @@ with col_mt3:
             lp_df.loc[lp_df["Group"] == g, "MT3_start"] = new_date
 
 
-# --- 中央：ドラフト編集用テーブル（全幅） ---
 st.markdown("**Editing table – Season start dates per group (draft)**")
 
 landprep_draft = st.data_editor(
@@ -724,7 +854,6 @@ landprep_draft = st.data_editor(
     },
 )
 
-# テーブル直下に Reset / Apply ボタンを横並びで配置
 col_lp1, col_lp2 = st.columns([1, 1])
 with col_lp1:
     if st.button("Reset season dates", key="btn_lp_reset"):
@@ -739,24 +868,42 @@ with col_lp2:
         st.success("Season start dates applied to calculations.")
         st.rerun()
 
-# コミット済みデータ（後続計算用）
 landprep_edited = st.session_state["landprep_df"]
 st.session_state["landprep_df"] = landprep_edited
 
-# --- 下部：変更箇所ハイライト付きプレビュー（中央寄せ、行番号1始まり） ---
-st.markdown("**Preview (changed cells in yellow)**")
+st.markdown("**Preview (changed cells in yellow – date columns compared by month/day only)**")
 
 current_df = st.session_state["landprep_df_draft"].reset_index(drop=True)
 default_df = st.session_state["landprep_df_default"].reset_index(drop=True)
 
-# 行番号 1始まりに変更
 current_df.index = range(1, len(current_df) + 1)
 default_df.index = current_df.index
 
 def landprep_diff_highlighter(data: pd.DataFrame) -> pd.DataFrame:
+    """
+    日付列（MT1_start, MT2_start, MT3_start）は月日ベースで比較。
+    その他の列は通常の値比較。
+    """
     styles = pd.DataFrame("", index=data.index, columns=data.columns)
-    diff_mask = current_df.ne(default_df)
-    styles = styles.mask(diff_mask, "background-color: #fff2a8")
+    date_cols = ["MT1_start", "MT2_start", "MT3_start"]
+    
+    for col in data.columns:
+        if col in date_cols:
+            # 日付列は月日ベースで比較（年は無視）
+            for idx in data.index:
+                cur_val = current_df.loc[idx, col]
+                def_val = default_df.loc[idx, col]
+                if hasattr(cur_val, 'month') and hasattr(def_val, 'month'):
+                    if cur_val.month != def_val.month or cur_val.day != def_val.day:
+                        styles.loc[idx, col] = "background-color: #fff2a8"
+                elif cur_val != def_val:
+                    styles.loc[idx, col] = "background-color: #fff2a8"
+        else:
+            # その他の列（Group, MT3_active, MT3_days）は通常比較
+            for idx in data.index:
+                if current_df.loc[idx, col] != default_df.loc[idx, col]:
+                    styles.loc[idx, col] = "background-color: #fff2a8"
+    
     return styles
 
 styled_lp_preview = (
@@ -806,15 +953,13 @@ st.info("These start dates will later be converted to 5Day_ID (1–72) for each 
 
 
 # ========================================
-# 4–6. Re / ETo / LP (detailed inputs & intermediate tables)
+# 4–5. ETo / LP (detailed inputs & intermediate tables)
 # ========================================
-with st.expander("4–6. Detailed inputs & LP calculation (Re / ETo / LP)", expanded=False):
+with st.expander("4–5. Detailed inputs & LP calculation (ETo / LP)", expanded=False):
 
-    # --------- 共通スタイル（読み込み済み / 要アップロード）---------
     st.markdown(
         """
         <style>
-        /* 読み込み済み CSV を示す緑のボックス */
         .loaded-box{
             border:1px solid #16a34a;
             background:#ecfdf3;
@@ -833,8 +978,6 @@ with st.expander("4–6. Detailed inputs & LP calculation (Re / ETo / LP)", expa
         .loaded-sub{
             font-size:0.9rem;
         }
-
-        /* アップロードが必要なときの赤ボックス */
         .need-upload-box{
             border:1px solid #b91c1c;
             background:#fef2f2;
@@ -853,8 +996,6 @@ with st.expander("4–6. Detailed inputs & LP calculation (Re / ETo / LP)", expa
         .need-upload-sub{
             font-size:0.9rem;
         }
-
-        /* 小さめアップローダ用 */
         .small-uploader > div[data-testid="stFileUploader"]{
             padding-top:4px;
             padding-bottom:4px;
@@ -868,8 +1009,7 @@ with st.expander("4–6. Detailed inputs & LP calculation (Re / ETo / LP)", expa
         unsafe_allow_html=True,
     )
 
-    def show_loaded_csv(kind: str, label: str, detail: str):
-        """読み込み済み CSV / セッション情報を緑ボックス＋✅で表示"""
+    def show_loaded_csv_inner(kind: str, label: str, detail: str):
         st.markdown(
             f"""
             <div class="loaded-box">
@@ -880,8 +1020,7 @@ with st.expander("4–6. Detailed inputs & LP calculation (Re / ETo / LP)", expa
             unsafe_allow_html=True,
         )
 
-    def show_need_upload(label: str, detail: str):
-        """アップロードが必要なときだけ赤ボックスで強調"""
+    def show_need_upload_inner(label: str, detail: str):
         st.markdown(
             f"""
             <div class="need-upload-box">
@@ -892,247 +1031,8 @@ with st.expander("4–6. Detailed inputs & LP calculation (Re / ETo / LP)", expa
             unsafe_allow_html=True,
         )
 
-    # ---------- 4. Effective Rain (Re) – Page1 / Re_5Day.csv / manual upload ----------
-    st.subheader("4. Effective Rainfall (Re) – from Page1 or Re_5Day.csv")
-
-    st.markdown("""
-    This section uses **effective rainfall Re (mm/day)**:
-
-    1. If you have already opened **Page1 (Rain & Thiessen)** in this session,  
-       Re is taken from the session (`re_table / re_paddy / re_palawija`).  
-    2. If not, this page looks for a CSV whose filename contains **`Re_5Day`** in the `csv` folder  
-       (expected columns: `group, Crop, Month, Step, Re`).  
-    3. If neither is available, you can upload a CSV manually.
-    """)
-
-    # ---- まず session_state から Re を探す ----
-    re_table    = st.session_state.get("re_table", None)
-    re_paddy    = st.session_state.get("re_paddy", None)
-    re_palawija = st.session_state.get("re_palawija", None)
-    re_src_label  = st.session_state.get("re_source_label", None)
-    re_src_detail = st.session_state.get("re_source_detail", None)
-
-    # ---------- 4-1. session_state に無ければ Re_5Day*.csv を自動読込 ----------
-    if re_table is None or re_paddy is None or re_palawija is None:
-        re_candidates = sorted(
-            [p for p in CSV_DIR.glob("*.csv") if "re_5day" in p.name.lower()],
-            key=lambda p: p.stat().st_mtime,
-            reverse=True,
-        )
-
-        if re_candidates:
-            re_path = re_candidates[0]
-            try:
-                re_df_raw = pd.read_csv(re_path)
-
-                required_re_cols = {"group", "Crop", "Month", "Step", "Re"}
-                if not required_re_cols.issubset(re_df_raw.columns):
-                    st.error(
-                        "Re_5Day CSV was found but does not contain required columns "
-                        f"{required_re_cols}. Actual columns: {set(re_df_raw.columns)}"
-                    )
-                else:
-                    re_df = re_df_raw.copy()
-                    re_df["group"] = re_df["group"].astype(str).str.strip()
-                    re_df["Crop"]  = re_df["Crop"].astype(str).str.strip()
-                    re_df["Month"] = pd.to_numeric(re_df["Month"], errors="coerce").astype("Int64")
-                    re_df["Step"]  = pd.to_numeric(re_df["Step"],  errors="coerce").astype("Int64")
-                    re_df["Re"]    = pd.to_numeric(re_df["Re"],    errors="coerce").fillna(0.0)
-
-                    re_table = (
-                        re_df
-                        .pivot_table(
-                            index=["group", "Crop"],
-                            columns=["Month", "Step"],
-                            values="Re",
-                            aggfunc="mean",
-                        )
-                    )
-
-                    # ★ 列 (Month,Step) を「水年順 11,12,1..10」で並べ替える
-                    cols = list(re_table.columns)  # 各 col = (Month, Step)
-                    def col_sort_key(c):
-                        month, step = c
-                        try:
-                            m_idx = water_month_order.index(month)  # [11,12,1..10] の順番
-                        except ValueError:
-                            m_idx = 99  # 想定外の月があった場合は末尾へ
-                        return (m_idx, step)
-
-                    cols_sorted = sorted(cols, key=col_sort_key)
-                    re_table = re_table[cols_sorted]
-
-                    # Re_paddy / Re_palawija
-                    try:
-                        re_paddy = re_table.xs("Re_paddy", level="Crop")
-                    except KeyError:
-                        re_paddy = None
-                    try:
-                        re_palawija = re_table.xs("Re_palawija", level="Crop")
-                    except KeyError:
-                        re_palawija = None
-
-                    st.session_state["re_table"] = re_table
-                    if re_paddy is not None:
-                        st.session_state["re_paddy"] = re_paddy
-                    if re_palawija is not None:
-                        st.session_state["re_palawija"] = re_palawija
-
-                    st.session_state["re_source_label"]  = re_path.name
-                    st.session_state["re_source_detail"] = "Loaded from CSV folder (Re_5Day*)."
-
-            except Exception as e:
-                st.error(f"Failed to read Re_5Day CSV: {e}")
-
-    # ---- 必要なら手動アップロードで補う ----
-    re_table    = st.session_state.get("re_table", None)
-    re_paddy    = st.session_state.get("re_paddy", None)
-    re_palawija = st.session_state.get("re_palawija", None)
-    re_src_label  = st.session_state.get("re_source_label", re_src_label)
-    re_src_detail = st.session_state.get("re_source_detail", re_src_detail)
-
-    if not (re_table is not None and re_paddy is not None and re_palawija is not None):
-        # まだ Re が揃っていない → 赤ボックスでアップロードを促す
-        show_need_upload(
-            "Re data is required.",
-            "Please either open Page1 (Rain & Thiessen) to compute Re, or upload a Re_5Day CSV "
-            "with columns `group, Crop, Month, Step, Re`."
-        )
-
-        uploaded_re = st.file_uploader(
-            "Upload Re table (CSV with columns: group,Crop,Month,Step,Re)",
-            type=["csv"],
-            key="re_csv",
-        )
-
-        if uploaded_re is not None:
-            try:
-                re_df_raw = pd.read_csv(uploaded_re)
-                required_re_cols = {"group", "Crop", "Month", "Step", "Re"}
-                if not required_re_cols.issubset(re_df_raw.columns):
-                    st.error(
-                        "Uploaded Re CSV must contain columns: group, Crop, Month, Step, Re.\n"
-                        f"Actual columns: {set(re_df_raw.columns)}"
-                    )
-                else:
-                    re_df = re_df_raw.copy()
-                    re_df["group"] = re_df["group"].astype(str).str.strip()
-                    re_df["Crop"]  = re_df["Crop"].astype(str).str.strip()
-                    re_df["Month"] = pd.to_numeric(re_df["Month"], errors="coerce").astype("Int64")
-                    re_df["Step"]  = pd.to_numeric(re_df["Step"],  errors="coerce").astype("Int64")
-                    re_df["Re"]    = pd.to_numeric(re_df["Re"],    errors="coerce").fillna(0.0)
-
-                    re_table = (
-                        re_df
-                        .pivot_table(
-                            index=["group", "Crop"],
-                            columns=["Month", "Step"],
-                            values="Re",
-                            aggfunc="mean",
-                        )
-                    )
-
-                    # ★ 11月はじまりの水年順に並べ替え
-                    cols = list(re_table.columns)
-                    def col_sort_key(c):
-                        month, step = c
-                        try:
-                            m_idx = water_month_order.index(month)
-                        except ValueError:
-                            m_idx = 99
-                        return (m_idx, step)
-
-                    cols_sorted = sorted(cols, key=col_sort_key)
-                    re_table = re_table[cols_sorted]
-
-                    try:
-                        re_paddy = re_table.xs("Re_paddy", level="Crop")
-                    except KeyError:
-                        re_paddy = None
-                    try:
-                        re_palawija = re_table.xs("Re_palawija", level="Crop")
-                    except KeyError:
-                        re_palawija = None
-
-                    st.session_state["re_table"] = re_table
-                    if re_paddy is not None:
-                        st.session_state["re_paddy"] = re_paddy
-                    if re_palawija is not None:
-                        st.session_state["re_palawija"] = re_palawija
-
-                    st.session_state["re_source_label"]  = uploaded_re.name
-                    st.session_state["re_source_detail"] = "Uploaded manually in Page2."
-                    st.success("Uploaded Re CSV has been loaded.")
-            except Exception as e:
-                st.error(f"Failed to read uploaded Re CSV: {e}")
-
-    # 最終的な Re 状態を再取得
-    re_table    = st.session_state.get("re_table", None)
-    re_paddy    = st.session_state.get("re_paddy", None)
-    re_palawija = st.session_state.get("re_palawija", None)
-    re_src_label  = st.session_state.get("re_source_label", None)
-    re_src_detail = st.session_state.get("re_source_detail", None)
-
-    # 表示用フォーマッタ
-    def re_formatter(v):
-        if pd.isna(v):
-            return ""
-        return f"{v:.1f}"
-
-    if re_table is not None and re_paddy is not None and re_palawija is not None:
-        # ソース情報が無ければ「Page1から」とみなす
-        if re_src_label is None:
-            re_src_label  = "session (Page1)"
-            re_src_detail = "Loaded from Page1 (Rain & Thiessen) session."
-
-        show_loaded_csv("Effective Rainfall (Re)", re_src_label, re_src_detail or "")
-
-        st.markdown("**Re table (rows = group × crop, columns = Month–Step)**")
-
-        styled_re = (
-            re_table
-            .style
-            .format(re_formatter)
-            .bar(axis=None, color="#4d88ff")
-            .set_properties(**{
-                "padding": "2px 4px",
-                "line-height": "1.0",
-                "font-size": "16px",
-            })
-            .set_table_styles([
-                {"selector": "table",
-                 "props": [("border-collapse", "collapse"),
-                           ("border", "1px solid #999")]},
-                {"selector": "th.row_heading",
-                 "props": [("min-width", "40px"),
-                           ("white-space", "nowrap"),
-                           ("border", "1px solid #999")]},
-                {"selector": "th.blank",
-                 "props": [("min-width", "40px"),
-                           ("border", "1px solid #999")]},
-                {"selector": "th.col_heading",
-                 "props": [("min-width", "40px"),
-                           ("max-width", "40px"),
-                           ("white-space", "nowrap"),
-                           ("border", "1px solid #999")]},
-                {"selector": "td",
-                 "props": [("border", "1px solid #999"),
-                           ("padding", "2px 4px")]},
-            ])
-        )
-
-        html_re = (
-            '<div style="overflow-x:auto; text-align:left;">'
-            f'{styled_re.to_html()}'
-            '</div>'
-        )
-        st.markdown(html_re, unsafe_allow_html=True)
-    else:
-        # Re が最終的に無い場合は、7・8章側が warning を出すのでここでは追加しない
-        st.info("Re data is still not available; sections 7 and 8 will be skipped accordingly.")
-
-    # ---------- 5. ETo (mm/day, Jatiwangi Station) ----------
-    st.subheader("5. ETo (mm/day, Jatiwangi Station)")
+    # ---------- 4. ETo (mm/day, Jatiwangi Station) ----------
+    st.subheader("4. ETo (mm/day, Jatiwangi Station)")
 
     st.markdown("""
     ETo is assumed to be **common to all groups** and corresponds to the
@@ -1166,7 +1066,6 @@ with st.expander("4–6. Detailed inputs & LP calculation (Re / ETo / LP)", expa
     eto_df_local = None
     selected_eto_path = None
 
-    # --- 5-1. csv フォルダから自動検出 ---
     eto_candidates = sorted(
         [p for p in CSV_DIR.glob("*.csv") if "eto" in p.name.lower()],
         key=lambda p: p.stat().st_mtime,
@@ -1210,7 +1109,6 @@ with st.expander("4–6. Detailed inputs & LP calculation (Re / ETo / LP)", expa
     else:
         st.caption("No ETo CSV found in `csv` folder yet.")
 
-    # --- 5-2. 手動アップロードで上書きも可能 ---
     st.caption("Or upload another ETo CSV (will override the folder selection):")
 
     eto_file = st.file_uploader(
@@ -1247,11 +1145,10 @@ with st.expander("4–6. Detailed inputs & LP calculation (Re / ETo / LP)", expa
     eto_src_detail = st.session_state.get("eto_source_detail", None)
 
     if eto_df_local is not None:
-        # ソース情報がある場合は、緑ボックス＋チェックで明示
         if eto_src_label is None:
             eto_src_label  = "ETo CSV"
             eto_src_detail = "Loaded from current session."
-        show_loaded_csv("ETo (mm/day)", eto_src_label, eto_src_detail or "Jatiwangi Station")
+        show_loaded_csv_inner("ETo (mm/day)", eto_src_label, eto_src_detail or "Jatiwangi Station")
 
         st.markdown("**ETo (mm/day) table (rows = ETo, columns = Month–Step)**")
 
@@ -1303,14 +1200,13 @@ with st.expander("4–6. Detailed inputs & LP calculation (Re / ETo / LP)", expa
         )
         st.markdown(html_eto, unsafe_allow_html=True)
     else:
-        # ここまでで ETo がひとつも決まらなかった場合だけ赤ボックス
-        show_need_upload(
+        show_need_upload_inner(
             "ETo CSV is required.",
             "Select an ETo CSV from the list above or upload a CSV with columns `5Day_ID, ETo`."
         )
 
-    # ---------- 6. LP calculation per 5-day step ----------
-    st.subheader("6. LP calculation per 5-day step")
+    # ---------- 5. LP calculation per 5-day step ----------
+    st.subheader("5. LP calculation per 5-day step")
 
     st.markdown("""
     We compute **LP (mm/day)** for each 5-day step using:
@@ -1324,7 +1220,7 @@ with st.expander("4–6. Detailed inputs & LP calculation (Re / ETo / LP)", expa
 
     eto_df = st.session_state.get("eto_df", None)
     if eto_df is None:
-        st.warning("ETo data has not been uploaded yet. Please upload ETo CSV in section 5.")
+        st.warning("ETo data has not been uploaded yet. Please upload ETo CSV in section 4.")
     else:
         basic_vals = basic_edited.set_index("Variable")["Value"]
 
@@ -1351,7 +1247,6 @@ with st.expander("4–6. Detailed inputs & LP calculation (Re / ETo / LP)", expa
             df_lp["M"] * df_lp["eK"] / denom
         )
 
-        # 後続計算用に SessionState へ保存
         st.session_state["lp_df"] = df_lp
 
         col_multi_lp = pd.MultiIndex.from_arrays(
@@ -1413,12 +1308,12 @@ with st.expander("4–6. Detailed inputs & LP calculation (Re / ETo / LP)", expa
 
 
 # ========================================
-# 7. LP / P / WLr / ETc distributions per group (by 5-day step)
+# 6. LP / P / WLr / ETc / Re / NFR distributions per group (by 5-day step)
 # ========================================
-st.header("7. LP / P / WLr / ETc distributions per group (by 5-day step)")
+st.header("6. LP / P / WLr / ETc / Re / NFR distributions per group (by 5-day step)")
 
-# ★ 共通 Bank filter（7と8で共有）
-st.markdown("##### Bank filter (shared by sections 7 and 8)")
+# ★ 共通 Bank filter（6と7で共有）
+st.markdown("##### Bank filter (shared by sections 6 and 7)")
 bank_options_common = ["Left", "Right"]
 selected_bank_common = st.radio(
     "Select bank",
@@ -1426,7 +1321,7 @@ selected_bank_common = st.radio(
     horizontal=True,
     label_visibility="collapsed",
     index=0,
-    key="radio_bank_shared",   # 共通 key
+    key="radio_bank_shared",
 )
 
 eto_df = st.session_state.get("eto_df", None)
@@ -1449,13 +1344,11 @@ else:
     durPmt2_days  = float(basic_vals.get("DurPmt2", 90))
     unitWLr       = float(basic_vals.get("UnitWLr", 1.67))
 
-    # Kc (MT-1/2 用)
     kc_vals = kc_edited.set_index("Variable")["Value"]
     Kc1 = float(kc_vals.get("Kc1", 1.10))
     Kc2 = float(kc_vals.get("Kc2", 1.05))
     Kc3 = float(kc_vals.get("Kc3", 0.95))
 
-    # Kc (MT-3 用)
     Kc1_mt3 = float(kc_vals.get("Kc1_mt3", 0.50))
     Kc2_mt3 = float(kc_vals.get("Kc2_mt3", 0.59))
     Kc3_mt3 = float(kc_vals.get("Kc3_mt3", 0.96))
@@ -1463,7 +1356,6 @@ else:
     Kc5_mt3 = float(kc_vals.get("Kc5_mt3", 1.02))
     Kc6_mt3 = float(kc_vals.get("Kc6_mt3", 0.95))
 
-    # LP 基本値: 5Day_ID → LP(mm/day)
     lp_base = lp_df.copy()
     lp_base["5Day_ID"] = eto_df["5Day_ID"].to_numpy()
     lp_base = lp_base.set_index("5Day_ID")["LP"]
@@ -1471,7 +1363,6 @@ else:
     ids = lp_base.index.to_numpy()
     n_steps = len(lp_base)
 
-    # 列ヘッダ用（Month,Step の MultiIndex）
     season_index_ids = (ids - 1) // 6
     months = ((season_index_ids + 10) % 12) + 1
     steps  = ((ids - 1) % 6) + 1
@@ -1485,7 +1376,6 @@ else:
     offset_steps      = max(1, int(round(secshift_days / step_per_day)))
     ETo_arr           = eto_df["ETo"].to_numpy()
 
-    # ---------- Kc を返すヘルパー ----------
     def kc_for_dat(season: str, dat_mid: float) -> float:
         if season in ("MT-1", "MT-2"):
             if 1 <= dat_mid <= 30:
@@ -1498,7 +1388,7 @@ else:
                 return Kc3
             else:
                 return 0.0
-        else:  # MT-3
+        else:
             if 1 <= dat_mid <= 15:
                 return Kc1_mt3
             elif 16 <= dat_mid <= 30:
@@ -1514,7 +1404,6 @@ else:
             else:
                 return 0.0
 
-    # ---------- 1シーズン分の分布を計算する関数 ----------
     def compute_distributions_for_season(season: str):
         if season == "MT-1":
             start_col = "MT1_start"
@@ -1524,7 +1413,7 @@ else:
             start_col = "MT2_start"
             durP_days = durPmt2_days
             max_DAT   = 75
-        else:  # MT-3
+        else:
             start_col = "MT3_start"
             durP_days = 0.0
             max_DAT   = 70
@@ -1538,13 +1427,11 @@ else:
         active_WLr = {g: np.zeros(n_steps, dtype=int) for g in groups}
         ETc_dist   = {g: np.zeros(n_steps, dtype=float) for g in groups}
 
-        # MT-3 active map
         if "MT3_active" in landprep_df.columns:
             mt3_active_map = dict(zip(landprep_df["Group"], landprep_df["MT3_active"]))
         else:
             mt3_active_map = {g: True for g in groups}
 
-        # MT-3 days map（なければ 70 日）
         if "MT3_days" in landprep_df.columns:
             mt3_days_map = dict(zip(landprep_df["Group"], landprep_df["MT3_days"]))
         else:
@@ -1573,7 +1460,6 @@ else:
 
             for sec in range(section_n):
                 if season in ("MT-1", "MT-2"):
-                    # ---- LP: Section s ----
                     start_idx_lp = base_index + sec * offset_steps
                     for k in range(durLP_steps):
                         raw_idx = start_idx_lp + k
@@ -1581,12 +1467,10 @@ else:
                             break
                         act_LP[raw_idx] += 1
 
-                    # LP 最終ステップ
                     last_lp_idx = start_idx_lp + durLP_steps - 1
                     if last_lp_idx >= n_steps:
                         last_lp_idx = n_steps - 1
 
-                    # ---- P ----
                     if durP_steps > 0:
                         for k in range(durP_steps):
                             raw_idx = last_lp_idx + k
@@ -1594,14 +1478,12 @@ else:
                                 break
                             act_P[raw_idx] += 1
 
-                    # ---- WLr ----
                     for k in range(durWL_steps):
                         raw_idx = last_lp_idx + 1 + k
                         if raw_idx >= n_steps:
                             break
                         act_WLr[raw_idx] += 1
 
-                    # ---- ETc ----
                     j = 0
                     while True:
                         dat_mid = j * 5 + 3
@@ -1618,7 +1500,7 @@ else:
                             etc_vec[idx_e] += etc_val / float(section_n)
                         j += 1
 
-                else:  # MT-3：LP/P/WLr は計上せず、ETc のみ
+                else:
                     start_idx_etc = base_index + sec * offset_steps
                     j = 0
                     while True:
@@ -1634,7 +1516,6 @@ else:
                             etc_vec[idx_e] += etc_val / float(section_n)
                         j += 1
 
-        # 分布を計算
         base_vals = lp_base.to_numpy()
         LP_dist   = {}
         P_dist    = {}
@@ -1672,7 +1553,6 @@ else:
 
         return dist_LP_table, dist_P_table, dist_WLr_table, dist_ETc_table
 
-    # ---------- MT-1, MT-2, MT-3 をまとめて計算 ----------
     seasons_all = ["MT-1", "MT-2", "MT-3"]
     LP_tables   = {}
     P_tables    = {}
@@ -1688,7 +1568,6 @@ else:
     dist_WLr_all = pd.concat(WLr_tables.values(), keys=seasons_all, names=["Season", "Group"])
     dist_ETc_all = pd.concat(ETc_tables.values(), keys=seasons_all, names=["Season", "Group"])
 
-    # ---------- 表示用フォーマッタ / スタイル ----------
     def dist_formatter(v):
         if pd.isna(v):
             return ""
@@ -1707,7 +1586,7 @@ else:
         "line-height": "1.1",
         "font-size": "13px",
     }
-    DATA_COL_WIDTH = "42px"  # 5-day step列の幅
+    DATA_COL_WIDTH = "42px"
 
     common_table_styles = [
         {
@@ -1763,19 +1642,17 @@ else:
         },
     ]
 
-    # ★ Bank filter: shared selection (selected_bank_common)
     idx_groups = dist_LP_all.index.get_level_values("Group")
     bank_mask  = np.array([group_to_bank.get(g, "") == selected_bank_common for g in idx_groups])
 
     mt12_mask      = dist_LP_all.index.get_level_values("Season").isin(["MT-1", "MT-2"])
     mask_mt12_bank = mt12_mask & bank_mask
-    mask_all_bank  = bank_mask.copy()   # 8章でも使用
+    mask_all_bank  = bank_mask.copy()
 
-    # ===== 7(1)〜7(4) をまとめて折りたたみ =====
-    with st.expander("7 (1)–(4)  LP / P / WLr / ETc distributions (details)", expanded=False):
+    # ===== 6(1)〜6(5) をまとめて折りたたみ =====
+    with st.expander("6 (1)–(5)  LP / P / WLr / ETc / Re distributions (details)", expanded=False):
 
-        # 7 (1). LP
-        st.markdown("#### 7 (1). LP distribution per group (MT-1, MT-2)")
+        st.markdown("#### 6 (1). LP distribution per group (MT-1, MT-2)")
         view_LP = dist_LP_all[mask_mt12_bank].rename_axis(index=[None, None])
         styled_LP = (
             view_LP
@@ -1792,8 +1669,7 @@ else:
             unsafe_allow_html=True,
         )
 
-        # 7 (2). P
-        st.markdown("#### 7 (2). P distribution per group (MT-1, MT-2)")
+        st.markdown("#### 6 (2). P distribution per group (MT-1, MT-2)")
         view_P = dist_P_all[mask_mt12_bank].rename_axis(index=[None, None])
         styled_P = (
             view_P
@@ -1810,8 +1686,7 @@ else:
             unsafe_allow_html=True,
         )
 
-        # 7 (3). WLr
-        st.markdown("#### 7 (3). WLr distribution per group (MT-1, MT-2)")
+        st.markdown("#### 6 (3). WLr distribution per group (MT-1, MT-2)")
         view_WLr = dist_WLr_all[mask_mt12_bank].rename_axis(index=[None, None])
         styled_WLr = (
             view_WLr
@@ -1828,8 +1703,7 @@ else:
             unsafe_allow_html=True,
         )
 
-        # 7 (4). ETc
-        st.markdown("#### 7 (4). ETc distribution per group (MT-1, MT-2, MT-3)")
+        st.markdown("#### 6 (4). ETc distribution per group (MT-1, MT-2, MT-3)")
         view_ETc = dist_ETc_all[mask_all_bank].rename_axis(index=[None, None])
         styled_ETc = (
             view_ETc
@@ -1846,67 +1720,277 @@ else:
             unsafe_allow_html=True,
         )
 
-    # ===== 7 (5). NFR (mm/day) – 折りたたみ対象外で常に表示 =====
-    st.markdown("#### 7 (5). NFR (mm/day) per group and season")
+        # ===== 6 (5). Effective Rainfall (Re) – expander内 =====
+        st.markdown("#### 6 (5). Effective Rainfall (Re)")
 
-    re_paddy_7    = st.session_state.get("re_paddy", None)
-    re_palawija_7 = st.session_state.get("re_palawija", None)
+        st.markdown("""
+        This section uses **effective rainfall Re (mm/day)**:
 
-    if re_paddy_7 is None or re_palawija_7 is None:
+        1. If you have already opened **Page1 (Rain & Thiessen)** in this session,  
+           Re is taken from the session (`re_table / re_paddy / re_palawija`).  
+        2. If not, this page looks for a CSV whose filename contains **`Re_5Day`** in the `csv` folder  
+           (expected columns: `group, Crop, Month, Step, Re`).  
+        3. If neither is available, you can upload a CSV manually.
+        """)
+
+        re_table    = st.session_state.get("re_table", None)
+        re_paddy    = st.session_state.get("re_paddy", None)
+        re_palawija = st.session_state.get("re_palawija", None)
+        re_src_label  = st.session_state.get("re_source_label", None)
+        re_src_detail = st.session_state.get("re_source_detail", None)
+
+        # Re_5Day*.csv を自動読込
+        if re_table is None or re_paddy is None or re_palawija is None:
+            re_candidates = sorted(
+                [p for p in CSV_DIR.glob("*.csv") if "re_5day" in p.name.lower()],
+                key=lambda p: p.stat().st_mtime,
+                reverse=True,
+            )
+
+            if re_candidates:
+                re_path = re_candidates[0]
+                try:
+                    re_df_raw = pd.read_csv(re_path)
+
+                    required_re_cols = {"group", "Crop", "Month", "Step", "Re"}
+                    if not required_re_cols.issubset(re_df_raw.columns):
+                        st.error(
+                            "Re_5Day CSV was found but does not contain required columns "
+                            f"{required_re_cols}. Actual columns: {set(re_df_raw.columns)}"
+                        )
+                    else:
+                        re_df = re_df_raw.copy()
+                        re_df["group"] = re_df["group"].astype(str).str.strip()
+                        re_df["Crop"]  = re_df["Crop"].astype(str).str.strip()
+                        re_df["Month"] = pd.to_numeric(re_df["Month"], errors="coerce").astype("Int64")
+                        re_df["Step"]  = pd.to_numeric(re_df["Step"],  errors="coerce").astype("Int64")
+                        re_df["Re"]    = pd.to_numeric(re_df["Re"],    errors="coerce").fillna(0.0)
+
+                        re_table = (
+                            re_df
+                            .pivot_table(
+                                index=["group", "Crop"],
+                                columns=["Month", "Step"],
+                                values="Re",
+                                aggfunc="mean",
+                            )
+                        )
+
+                        cols = list(re_table.columns)
+                        def col_sort_key(c):
+                            month, step = c
+                            try:
+                                m_idx = water_month_order.index(month)
+                            except ValueError:
+                                m_idx = 99
+                            return (m_idx, step)
+
+                        cols_sorted = sorted(cols, key=col_sort_key)
+                        re_table = re_table[cols_sorted]
+
+                        try:
+                            re_paddy = re_table.xs("Re_paddy", level="Crop")
+                        except KeyError:
+                            re_paddy = None
+                        try:
+                            re_palawija = re_table.xs("Re_palawija", level="Crop")
+                        except KeyError:
+                            re_palawija = None
+
+                        st.session_state["re_table"] = re_table
+                        if re_paddy is not None:
+                            st.session_state["re_paddy"] = re_paddy
+                        if re_palawija is not None:
+                            st.session_state["re_palawija"] = re_palawija
+
+                        st.session_state["re_source_label"]  = re_path.name
+                        st.session_state["re_source_detail"] = "Loaded from CSV folder (Re_5Day*)."
+
+                except Exception as e:
+                    st.error(f"Failed to read Re_5Day CSV: {e}")
+
+        re_table    = st.session_state.get("re_table", None)
+        re_paddy    = st.session_state.get("re_paddy", None)
+        re_palawija = st.session_state.get("re_palawija", None)
+        re_src_label  = st.session_state.get("re_source_label", re_src_label)
+        re_src_detail = st.session_state.get("re_source_detail", re_src_detail)
+
+        if not (re_table is not None and re_paddy is not None and re_palawija is not None):
+            show_need_upload(
+                "Re data is required.",
+                "Please either open Page1 (Rain & Thiessen) to compute Re, or upload a Re_5Day CSV "
+                "with columns `group, Crop, Month, Step, Re`."
+            )
+
+            uploaded_re = st.file_uploader(
+                "Upload Re table (CSV with columns: group,Crop,Month,Step,Re)",
+                type=["csv"],
+                key="re_csv",
+            )
+
+            if uploaded_re is not None:
+                try:
+                    re_df_raw = pd.read_csv(uploaded_re)
+                    required_re_cols = {"group", "Crop", "Month", "Step", "Re"}
+                    if not required_re_cols.issubset(re_df_raw.columns):
+                        st.error(
+                            "Uploaded Re CSV must contain columns: group, Crop, Month, Step, Re.\n"
+                            f"Actual columns: {set(re_df_raw.columns)}"
+                        )
+                    else:
+                        re_df = re_df_raw.copy()
+                        re_df["group"] = re_df["group"].astype(str).str.strip()
+                        re_df["Crop"]  = re_df["Crop"].astype(str).str.strip()
+                        re_df["Month"] = pd.to_numeric(re_df["Month"], errors="coerce").astype("Int64")
+                        re_df["Step"]  = pd.to_numeric(re_df["Step"],  errors="coerce").astype("Int64")
+                        re_df["Re"]    = pd.to_numeric(re_df["Re"],    errors="coerce").fillna(0.0)
+
+                        re_table = (
+                            re_df
+                            .pivot_table(
+                                index=["group", "Crop"],
+                                columns=["Month", "Step"],
+                                values="Re",
+                                aggfunc="mean",
+                            )
+                        )
+
+                        cols = list(re_table.columns)
+                        def col_sort_key(c):
+                            month, step = c
+                            try:
+                                m_idx = water_month_order.index(month)
+                            except ValueError:
+                                m_idx = 99
+                            return (m_idx, step)
+
+                        cols_sorted = sorted(cols, key=col_sort_key)
+                        re_table = re_table[cols_sorted]
+
+                        try:
+                            re_paddy = re_table.xs("Re_paddy", level="Crop")
+                        except KeyError:
+                            re_paddy = None
+                        try:
+                            re_palawija = re_table.xs("Re_palawija", level="Crop")
+                        except KeyError:
+                            re_palawija = None
+
+                        st.session_state["re_table"] = re_table
+                        if re_paddy is not None:
+                            st.session_state["re_paddy"] = re_paddy
+                        if re_palawija is not None:
+                            st.session_state["re_palawija"] = re_palawija
+
+                        st.session_state["re_source_label"]  = uploaded_re.name
+                        st.session_state["re_source_detail"] = "Uploaded manually in Page2."
+                        st.success("Uploaded Re CSV has been loaded.")
+                except Exception as e:
+                    st.error(f"Failed to read uploaded Re CSV: {e}")
+
+        re_table    = st.session_state.get("re_table", None)
+        re_paddy    = st.session_state.get("re_paddy", None)
+        re_palawija = st.session_state.get("re_palawija", None)
+        re_src_label  = st.session_state.get("re_source_label", None)
+        re_src_detail = st.session_state.get("re_source_detail", None)
+
+        def re_formatter(v):
+            if pd.isna(v):
+                return ""
+            return f"{v:.1f}"
+
+        if re_table is not None and re_paddy is not None and re_palawija is not None:
+            if re_src_label is None:
+                re_src_label  = "session (Page1)"
+                re_src_detail = "Loaded from Page1 (Rain & Thiessen) session."
+
+            show_loaded_csv("Effective Rainfall (Re)", re_src_label, re_src_detail or "")
+
+            st.markdown("**Re table (rows = group × crop, columns = Month–Step)**")
+
+            # Bank filterを適用
+            re_idx_groups = re_table.index.get_level_values("group")
+            re_bank_mask = np.array([group_to_bank.get(g, "") == selected_bank_common for g in re_idx_groups])
+            view_re = re_table[re_bank_mask].rename_axis(index=[None, None])
+
+            # 他の表と同じスタイルを適用
+            styled_re = (
+                view_re
+                .style
+                .format(re_formatter)
+                .bar(axis=None, color="#4d88ff")
+                .set_properties(**common_style_props)
+                .set_table_styles(common_table_styles)
+            )
+
+            html_re = (
+                '<div style="overflow-x:auto; text-align:left;">'
+                f'{styled_re.to_html()}'
+                '</div>'
+            )
+            st.markdown(html_re, unsafe_allow_html=True)
+        else:
+            st.info("Re data is still not available; section 6(6) NFR will be skipped accordingly.")
+
+    # ===== 6 (6). NFR (mm/day) =====
+    st.markdown("#### 6 (6). NFR (mm/day) per group and season")
+
+    re_paddy_6    = st.session_state.get("re_paddy", None)
+    re_palawija_6 = st.session_state.get("re_palawija", None)
+
+    if re_paddy_6 is None or re_palawija_6 is None:
         st.info(
             "Re data is not available, so the NFR (mm/day) table is skipped here. "
             "Please make sure Page1 or a Re_5Day CSV has been loaded if you need this view."
         )
     else:
-        # Re(mm/day) テーブルを再構築（7章用）
-        rows_re_7 = []
-        idx_list_7 = []
+        rows_re_6 = []
+        idx_list_6 = []
         for season in seasons_all:
             for g in groups:
                 gol_idx = group_to_gol_idx.get(g, 1)
 
                 if season in ("MT-1", "MT-2"):
-                    src = re_paddy_7
+                    src = re_paddy_6
                     if g in src.index:
-                        rows_re_7.append(src.loc[g])
+                        rows_re_6.append(src.loc[g])
                     else:
-                        rows_re_7.append(pd.Series(0.0, index=src.columns))
+                        rows_re_6.append(pd.Series(0.0, index=src.columns))
                 else:
                     active_flag = bool(
                         landprep_df.loc[landprep_df["Group"] == g, "MT3_active"].iloc[0]
                     ) if "MT3_active" in landprep_df.columns and g in list(landprep_df["Group"]) else True
                     if gol_idx == 3 or not active_flag:
-                        rows_re_7.append(pd.Series(0.0, index=re_palawija_7.columns))
+                        rows_re_6.append(pd.Series(0.0, index=re_palawija_6.columns))
                     else:
-                        src = re_palawija_7
+                        src = re_palawija_6
                         if g in src.index:
-                            rows_re_7.append(src.loc[g])
+                            rows_re_6.append(src.loc[g])
                         else:
-                            rows_re_7.append(pd.Series(0.0, index=src.columns))
+                            rows_re_6.append(pd.Series(0.0, index=src.columns))
 
-                idx_list_7.append((season, g))
+                idx_list_6.append((season, g))
 
-        re_all_7 = pd.DataFrame(
-            rows_re_7,
-            index=pd.MultiIndex.from_tuples(idx_list_7, names=["Season", "Group"]),
-            columns=re_palawija_7.columns,
+        re_all_6 = pd.DataFrame(
+            rows_re_6,
+            index=pd.MultiIndex.from_tuples(idx_list_6, names=["Season", "Group"]),
+            columns=re_palawija_6.columns,
         )
 
-        re_all_7 = re_all_7.reindex(columns=col_multi)
+        re_all_6 = re_all_6.reindex(columns=col_multi)
 
-        total_req_7 = dist_LP_all.add(dist_P_all,   fill_value=0) \
+        total_req_6 = dist_LP_all.add(dist_P_all,   fill_value=0) \
                                 .add(dist_WLr_all,  fill_value=0) \
                                 .add(dist_ETc_all,  fill_value=0)
 
-        NFR_mm_7 = (total_req_7 - re_all_7).clip(lower=0)
+        NFR_mm_6 = (total_req_6 - re_all_6).clip(lower=0)
 
-        # Bank filter（共通ラジオ selected_bank_common を使用）
-        idx_groups_nfr7 = NFR_mm_7.index.get_level_values("Group")
-        mask_bank_nfr7  = np.array(
-            [group_to_bank.get(g, "") == selected_bank_common for g in idx_groups_nfr7]
+        idx_groups_nfr6 = NFR_mm_6.index.get_level_values("Group")
+        mask_bank_nfr6  = np.array(
+            [group_to_bank.get(g, "") == selected_bank_common for g in idx_groups_nfr6]
         )
 
-        view_NFR_mm = NFR_mm_7[mask_bank_nfr7].rename_axis(index=[None, None])
+        view_NFR_mm = NFR_mm_6[mask_bank_nfr6].rename_axis(index=[None, None])
 
         def nfr_mm_formatter(v):
             if pd.isna(v) or abs(v) < 1e-9:
@@ -1916,7 +2000,7 @@ else:
         def nfr_mm_highlight(data: pd.DataFrame) -> pd.DataFrame:
             styles = pd.DataFrame("", index=data.index, columns=data.columns)
             mask_pos = data > 0
-            styles = styles.mask(mask_pos, "background-color: #d9ead3")  # light green
+            styles = styles.mask(mask_pos, "background-color: #d9ead3")
             return styles
 
         styled_NFR_mm = (
@@ -1936,32 +2020,12 @@ else:
         )
 
 
-
 # ========================================
-# 8. NFR calculation (in L/s/ha) and CSV export
+# 7. NFR calculation (in L/s/ha) and CSV export
 # ========================================
-st.header("8. NFR per group and season (in L/s/ha)")
+st.header("7. NFR per group and season (in L/s/ha)")
 
-# --- 前提条件チェック（ETo / LP / 分布表）が揃っているか ---
-eto_df       = st.session_state.get("eto_df", None)
-lp_df        = st.session_state.get("lp_df", None)
-landprep_df  = st.session_state.get("landprep_df", None)
-
-_dist_names   = ["dist_LP_all", "dist_P_all", "dist_WLr_all", "dist_ETc_all", "col_multi"]
-_missing_vars = [name for name in _dist_names if name not in globals()]
-
-if (eto_df is None) or (lp_df is None) or (landprep_df is None) or _missing_vars:
-    st.warning(
-        "To calculate the NFR, the following preparations are required:\n\n"
-        "5. Upload and load the ETo CSV file in ETo (mm/day, Jatiwangi Station)\n"
-        "6. Ensure that the LP calculation and \n"
-        "7. LP / P / WLr / ETc distributions have executed without error\n\n"
-        "Once these steps are complete, please reopen section 8."
-    )
-    st.stop()
-
-# --- Bank filter for NFR table (section 8, independent) ---
-st.markdown("##### Bank filter (NFR table – section 8)")
+st.markdown("##### Bank filter (NFR table – section 7)")
 bank_options_nfr = ["Left", "Right"]
 selected_bank_nfr = st.radio(
     "Select bank for NFR table",
@@ -1972,21 +2036,35 @@ selected_bank_nfr = st.radio(
     key="radio_bank_nfr",
 )
 
-# Re_paddy / Re_palawija が必要
+eto_df       = st.session_state.get("eto_df", None)
+lp_df        = st.session_state.get("lp_df", None)
+landprep_df  = st.session_state.get("landprep_df", None)
+
+_dist_names   = ["dist_LP_all", "dist_P_all", "dist_WLr_all", "dist_ETc_all", "col_multi"]
+_missing_vars = [name for name in _dist_names if name not in globals()]
+
+if (eto_df is None) or (lp_df is None) or (landprep_df is None) or _missing_vars:
+    st.warning(
+        "To calculate the NFR, the following preparations are required:\n\n"
+        "4. Upload and load the ETo CSV file in ETo (mm/day, Jatiwangi Station)\n"
+        "5. Ensure that the LP calculation and \n"
+        "6. LP / P / WLr / ETc distributions have executed without error\n\n"
+        "Once these steps are complete, please reopen section 7."
+    )
+    st.stop()
+
 re_paddy = st.session_state.get("re_paddy", None)
 re_palawija = st.session_state.get("re_palawija", None)
 
 if re_paddy is None or re_palawija is None:
     st.warning("Re data (Re_paddy / Re_palawija) is not available. "
-               "Please open the Rain & Thiessen page first.")
+               "Please open the Rain & Thiessen page first or upload Re_5Day CSV in section 6(5).")
 else:
-    # MT-3 active map
     if "MT3_active" in landprep_df.columns:
         mt3_active_map = dict(zip(landprep_df["Group"], landprep_df["MT3_active"]))
     else:
         mt3_active_map = {g: True for g in groups}
 
-    # 全 Season/Group に対して Re(mm/day) テーブルを作る
     rows_re = []
     idx_list = []
     seasons_all = ["MT-1", "MT-2", "MT-3"]
@@ -2019,18 +2097,14 @@ else:
         columns=re_palawija.columns
     )
 
-    # dist_* と同じ列構造に
     re_all = re_all.reindex(columns=col_multi)
 
-    # 合計要求量 = LP + P + WLr + ETc（すべて mm/day）
     total_req = dist_LP_all.add(dist_P_all, fill_value=0) \
                            .add(dist_WLr_all, fill_value=0) \
                            .add(dist_ETc_all, fill_value=0)
 
-    # NFR(mm/day) = total_req − Re（負の値は 0 にクリップ）
     NFR_mm = (total_req - re_all).clip(lower=0)
 
-    # mm/day → L/s/ha
     MM_TO_LPS_PER_HA = 10000.0 / 86400.0
     NFR_lps = NFR_mm * MM_TO_LPS_PER_HA
 
@@ -2042,7 +2116,6 @@ else:
         r"\frac{10\,000}{24 \times 60 \times 60}"
     )
 
-    # Bank マスク（8章用）
     idx_groups_nfr = NFR_lps.index.get_level_values("Group")
     mask_bank_nfr = np.array(
         [group_to_bank.get(g, "") == selected_bank_nfr for g in idx_groups_nfr]
@@ -2061,7 +2134,6 @@ else:
         styles = styles.mask(mask_pos, "background-color: #c2f0c2;")
         return styles
 
-    # 行インデックス名は隠した形で表示
     NFR_lps = NFR_lps.rename_axis(index=[None, None])
     nfr_view = NFR_lps[mask_bank_nfr]
 
@@ -2133,7 +2205,6 @@ else:
         unsafe_allow_html=True
     )
 
-    # CSV 用ロング形式
     rows_long = []
     for (season, group), row in NFR_lps.iterrows():
         for (month, step), val in row.items():
@@ -2159,4 +2230,3 @@ else:
         file_name="NFR_5Day.csv",
         mime="text/csv",
     )
-

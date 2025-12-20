@@ -16,6 +16,7 @@ def check_auth():
     password = st.text_input("Password", type="password", key="auth_password")
 
     if st.button("Login"):
+        # nembah DSS
         if password == PASS:
             st.session_state["logged_in"] = True
             st.rerun()

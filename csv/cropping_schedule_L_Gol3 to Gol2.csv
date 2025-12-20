@@ -1,0 +1,7 @@
+Group,MT1_start,MT2_start,MT3_start,MT3_active,MT3_days
+Left_Golongan 1,12/1/2025,5/16/2025,9/6/2025,TRUE,70
+Left_Golongan 2,12/11/2025,5/26/2025,9/16/2025,TRUE,60
+Left_Golongan 3,12/11/2025,5/26/2025,9/16/2025,TRUE,60
+Right_Golongan 1,12/1/2025,5/16/2025,9/6/2025,TRUE,70
+Right_Golongan 2,12/11/2025,5/26/2025,9/16/2025,TRUE,60
+Right_Golongan 3,12/21/2025,6/5/2025,9/26/2025,FALSE,0
