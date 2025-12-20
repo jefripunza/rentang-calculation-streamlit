@@ -1774,8 +1774,8 @@ st.markdown(
 
 st.markdown("**Report layout**")
 layout = st.radio(
-    "",
-    ("Summary (A4 portrait)", "Conditions (A3 portrait)", "Adjusted schedule (A3 landscape)"),
+    "Select Report Layout",
+    options=("Summary (A4 portrait)", "Conditions (A3 portrait)", "Adjusted schedule (A3 landscape)"),
     horizontal=True,
 )
 # 下の余白も少しだけにする

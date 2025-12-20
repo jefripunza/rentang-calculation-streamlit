@@ -1060,7 +1060,7 @@ row1_col_bank, row1_col_level, row1_col_view = st.columns([1.4, 1.8, 0.8])
 with row1_col_bank:
     st.markdown("**Bank**")
     selected_bank = st.radio(
-        label="",
+        label="Select Bank",
         options=["Left", "Right"],
         index=0,
         horizontal=True,
@@ -1070,7 +1070,7 @@ with row1_col_bank:
 with row1_col_level:
     st.markdown("**Canal level**")
     level_sel = st.radio(
-        label="",
+        label="Select Canal Level",
         options=["Main Canal", "Secondary Canal"],
         index=0,
         horizontal=True,
@@ -1129,7 +1129,7 @@ canal_names = order_canal["Canal"].tolist()
 
 st.markdown(f"**Select {level_name} (sorted by CanalKey)**")
 selected_canal = st.selectbox(
-    label="",
+    label="Select Canal",
     options=canal_names,
 )
 

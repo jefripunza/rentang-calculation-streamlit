@@ -1594,7 +1594,7 @@ col_bank, col_level = st.columns(2)
 with col_bank:
     selected_bank = st.radio(
         "Bank",
-        ["Left", "Right"],
+        options=["Left", "Right"],
         index=0,
         horizontal=True,
     )
@@ -1602,7 +1602,7 @@ with col_bank:
 with col_level:
     level_sel = st.radio(
         "Canal level",
-        ["Main Canal", "Secondary Canal"],
+        options=["Main Canal", "Secondary Canal"],
         index=0,
         horizontal=True,
     )
@@ -3580,7 +3580,7 @@ with st.expander("5. Condition settings for Qp/NFR scenario (per Canal)", expand
                 st.markdown("**Filter – Scope (table)**")
                 scope_sel = st.radio(
                     "Scope (for start-date table)",
-                    ["Secondary", "Main"],
+                    options=["Secondary", "Main"],
                     horizontal=True,
                     key="sec_cfg_scope_filter",
                 )
@@ -3591,7 +3591,7 @@ with st.expander("5. Condition settings for Qp/NFR scenario (per Canal)", expand
                 st.markdown("**Filter – Bank**")
                 bank_sel = st.radio(
                     "Bank (Left / Right)",
-                    ["Left", "Right"],
+                    options=["Left", "Right"],
                     horizontal=True,
                     key="sec_cfg_bank_filter",
                 )
@@ -4258,7 +4258,7 @@ with st.expander("6. Detail of NFR calculation result (per Secondary Canal)", ex
                     )
                     season_sel = st.radio(
                         "Season",
-                        seasons_available,
+                        options=seasons_available,
                         horizontal=True,
                         key="comp_season_filter",
                     )

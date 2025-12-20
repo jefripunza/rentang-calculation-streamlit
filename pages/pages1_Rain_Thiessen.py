@@ -61,7 +61,11 @@ st.markdown(
 )
 
 
-def show_loaded_csv(kind: str, filename: str, source: str):
+def show_loaded_csv(
+    kind: str,
+    filename: str,
+    source: str
+):
     """読み込み済み CSV を緑ボックス＋✅付きで表示"""
     st.markdown(
         f"""
@@ -74,7 +78,10 @@ def show_loaded_csv(kind: str, filename: str, source: str):
     )
 
 
-def show_need_upload(label: str, detail: str):
+def show_need_upload(
+    label: str,
+    detail: str
+):
     """アップロードが必要なときだけ表示する赤いボックス"""
     st.markdown(
         f"""

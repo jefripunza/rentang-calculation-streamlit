@@ -539,7 +539,7 @@ with col_bank:
 with col_level:
     level_sel = st.radio(
         "Canal level",
-        ["Main Canal", "Secondary Canal"],
+        options=["Main Canal", "Secondary Canal"],
         index=0,
         horizontal=True,
     )
