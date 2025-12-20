@@ -1,15 +1,9 @@
 
 import streamlit as st
-
-# 1. Load CSS
-def local_css(file_name):
-    with open(file_name) as f:
-        st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
-
-# 2. Pastikan CSS berada di folder yang sama
-local_css("cyberpunk.css")
+from util import local_css
 
 def render_sidebar():
+    # local_css("cyberpunk.css")
     st.sidebar.header("📌 Main Menu")
 
     # Home / Introduction

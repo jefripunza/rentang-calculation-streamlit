@@ -1,62 +1,350 @@
-/* cyberpunk.css */
+/* cyberpunk.css - Enhanced Edition */
 
-/* 1. Latar belakang & warna dasar */
-body {
-    background: radial-gradient(circle at 50% 30%, #0a0a0a, #010101);
+/* ========================================
+   1. ROOT VARIABLES & CUSTOM PROPERTIES
+   ======================================== */
+:root {
+    --neon-cyan: #00ffff;
+    --neon-magenta: #ff00ff;
+    --neon-yellow: #ffff00;
+    --neon-green: #39ff14;
+    --neon-orange: #ff6600;
+    --dark-bg: #0a0a0a;
+    --darker-bg: #010101;
+    --grid-color: rgba(0, 255, 255, 0.1);
+    --scanline-color: rgba(0, 255, 255, 0.05);
+}
+
+/* ========================================
+   2. BACKGROUND & BASE STYLING
+   ======================================== */
+body, .stApp {
+    background: 
+        linear-gradient(0deg, transparent 24%, var(--scanline-color) 25%, var(--scanline-color) 26%, transparent 27%, transparent 74%, var(--scanline-color) 75%, var(--scanline-color) 76%, transparent 77%, transparent),
+        linear-gradient(90deg, transparent 24%, var(--scanline-color) 25%, var(--scanline-color) 26%, transparent 27%, transparent 74%, var(--scanline-color) 75%, var(--scanline-color) 76%, transparent 77%, transparent),
+        radial-gradient(circle at 50% 30%, #1a0033, var(--darker-bg));
+    background-size: 50px 50px, 50px 50px, 100% 100%;
+    background-position: 0 0, 0 0, 0 0;
     color: #e0e0e0;
-    font-family: 'Orbitron', sans-serif; /* Pastikan font sudah dimuat */
+    font-family: 'Orbitron', 'Courier New', monospace;
 }
 
-/* 2. Judul utama dengan efek glitch */
-h1, .stTitle {
+/* ========================================
+   3. HEADINGS WITH ADVANCED GLITCH
+   ======================================== */
+h1, h2, h3, .stTitle {
     position: relative;
-    font-size: 3rem;
-    color: #ff00ff;
-    letter-spacing: 2px;
+    font-weight: 900;
+    color: var(--neon-cyan);
+    letter-spacing: 3px;
     text-transform: uppercase;
-    animation: glitch 3s infinite;
+    text-shadow: 
+        0 0 10px var(--neon-cyan),
+        0 0 20px var(--neon-cyan),
+        0 0 30px var(--neon-magenta),
+        0 0 40px var(--neon-magenta);
+    animation: glitchText 5s infinite;
 }
 
-/* 3. Link & tombol neon */
-a, .stButton > button {
-    background: linear-gradient(45deg, #00ffff, #ff00ff);
-    color: #111;
-    border: none;
-    border-radius: 4px;
-    padding: 10px 20px;
+h1, .stTitle {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+}
+
+h2 {
+    font-size: 2.5rem;
+    color: var(--neon-magenta);
+}
+
+h3 {
+    font-size: 1.8rem;
+    color: var(--neon-green);
+}
+
+
+/* ========================================
+   4. BUTTONS & LINKS - NEON STYLE
+   ======================================== */
+a, .stButton > button, button {
+    position: relative;
+    background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
+    color: var(--neon-cyan);
+    border: 2px solid var(--neon-cyan);
+    border-radius: 0;
+    padding: 12px 30px;
     font-weight: bold;
-    text-shadow: 0 0 5px #00ffff, 0 0 10px #ff00ff;
-    transition: transform 0.2s ease;
-}
-
-a:hover, .stButton > button:hover {
-    transform: scale(1.05);
-    text-shadow: 0 0 10px #00ffff, 0 0 20px #ff00ff;
-}
-
-/* 4. Input text dengan border neon */
-input, textarea, .stTextInput > div > div > div > input, .stTextArea > div > div > div > textarea {
-    background: transparent;
-    border: 2px solid #00ffff;
-    color: #fff;
-    padding: 8px 12px;
     font-size: 1rem;
-    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 
+        0 0 10px var(--neon-cyan),
+        inset 0 0 10px rgba(0, 255, 255, 0.1);
 }
 
-/* 5. Efek glitch (keyframes) */
-@keyframes glitch {
-    0%   { clip: rect(0, 9999px, 0, 0); transform: translate(0); }
-    20%  { clip: rect(10px, 9999px, 70px, 0); transform: translate(-2px, -2px); }
-    40%  { clip: rect(0, 9999px, 0, 0); transform: translate(2px, 2px); }
-    60%  { clip: rect(40px, 9999px, 100px, 0); transform: translate(-2px, -2px); }
-    80%  { clip: rect(60px, 9999px, 120px, 0); transform: translate(2px, 2px); }
-    100% { clip: rect(0, 9999px, 0, 0); transform: translate(0); }
+a:hover, .stButton > button:hover, button:hover {
+    transform: translateY(-2px);
+    color: var(--dark-bg);
+    background: var(--neon-cyan);
+    border-color: var(--neon-magenta);
+    box-shadow: 
+        0 0 20px var(--neon-cyan),
+        0 0 40px var(--neon-magenta),
+        inset 0 0 20px rgba(255, 0, 255, 0.3);
 }
 
-/* 6. Footer minimal */
+/* ========================================
+   5. INPUT FIELDS - ENHANCED NEON
+   ======================================== */
+input, textarea, select,
+.stTextInput > div > div > div > input,
+.stTextArea > div > div > div > textarea,
+.stSelectbox > div > div > div > select {
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid var(--neon-cyan);
+    color: #fff;
+    padding: 10px 15px;
+    font-size: 1rem;
+    font-family: 'Courier New', monospace;
+    border-radius: 0;
+    box-shadow: 
+        0 0 10px rgba(0, 255, 255, 0.3),
+        inset 0 0 10px rgba(0, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+input:focus, textarea:focus, select:focus,
+.stTextInput > div > div > div > input:focus,
+.stTextArea > div > div > div > textarea:focus {
+    outline: none;
+    border-color: var(--neon-magenta);
+    box-shadow: 
+        0 0 20px var(--neon-magenta),
+        inset 0 0 15px rgba(255, 0, 255, 0.2);
+    background: rgba(0, 0, 0, 0.7);
+}
+
+/* ========================================
+   6. CARDS & CONTAINERS
+   ======================================== */
+
+/* ========================================
+   7. SIDEBAR STYLING
+   ======================================== */
+section[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, rgba(10, 0, 20, 0.95), rgba(1, 1, 1, 0.95));
+    border-right: 2px solid var(--neon-cyan);
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+}
+
+section[data-testid="stSidebar"] > div {
+    background: transparent;
+}
+
+/* ========================================
+   8. TABLES & DATA FRAMES
+   ======================================== */
+table, .dataframe {
+    border-collapse: collapse;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+th, td {
+    border: 1px solid var(--neon-cyan);
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background: rgba(0, 255, 255, 0.1);
+    color: var(--neon-cyan);
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+tr:hover {
+    background: rgba(255, 0, 255, 0.1);
+    box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+}
+
+/* ========================================
+   9. SCROLLBAR CUSTOMIZATION
+   ======================================== */
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--dark-bg);
+    border: 1px solid rgba(0, 255, 255, 0.2);
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--neon-cyan), var(--neon-magenta));
+    border-radius: 0;
+    box-shadow: 0 0 10px var(--neon-cyan);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, var(--neon-magenta), var(--neon-cyan));
+    box-shadow: 0 0 20px var(--neon-magenta);
+}
+
+/* ========================================
+   10. FOOTER
+   ======================================== */
 footer {
     color: #555;
     font-size: 0.9rem;
     margin-top: 30px;
+    text-align: center;
+    padding: 20px;
+    border-top: 1px solid rgba(0, 255, 255, 0.2);
+    text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+}
+
+
+/* ========================================
+   11. ANIMATIONS & KEYFRAMES
+   ======================================== */
+@keyframes glitchText {
+    0%, 90%, 100% { 
+        transform: translate(0);
+        opacity: 1;
+    }
+    92% { 
+        transform: translate(-2px, 2px);
+        opacity: 0.8;
+    }
+    94% { 
+        transform: translate(2px, -2px);
+        opacity: 0.9;
+    }
+    96% { 
+        transform: translate(-1px, 1px);
+        opacity: 0.85;
+    }
+}
+
+@keyframes glitchAnim1 {
+    0% { clip: rect(42px, 9999px, 44px, 0); }
+    5% { clip: rect(12px, 9999px, 59px, 0); }
+    10% { clip: rect(48px, 9999px, 29px, 0); }
+    15% { clip: rect(42px, 9999px, 73px, 0); }
+    20% { clip: rect(63px, 9999px, 27px, 0); }
+    25% { clip: rect(34px, 9999px, 55px, 0); }
+    30% { clip: rect(86px, 9999px, 73px, 0); }
+    35% { clip: rect(20px, 9999px, 20px, 0); }
+    40% { clip: rect(26px, 9999px, 60px, 0); }
+    45% { clip: rect(25px, 9999px, 66px, 0); }
+    50% { clip: rect(57px, 9999px, 98px, 0); }
+    55% { clip: rect(5px, 9999px, 46px, 0); }
+    60% { clip: rect(82px, 9999px, 31px, 0); }
+    65% { clip: rect(54px, 9999px, 27px, 0); }
+    70% { clip: rect(28px, 9999px, 99px, 0); }
+    75% { clip: rect(45px, 9999px, 69px, 0); }
+    80% { clip: rect(23px, 9999px, 85px, 0); }
+    85% { clip: rect(54px, 9999px, 84px, 0); }
+    90% { clip: rect(45px, 9999px, 47px, 0); }
+    95% { clip: rect(37px, 9999px, 20px, 0); }
+    100% { clip: rect(4px, 9999px, 91px, 0); }
+}
+
+@keyframes glitchAnim2 {
+    0% { clip: rect(65px, 9999px, 100px, 0); }
+    5% { clip: rect(52px, 9999px, 74px, 0); }
+    10% { clip: rect(79px, 9999px, 85px, 0); }
+    15% { clip: rect(75px, 9999px, 5px, 0); }
+    20% { clip: rect(67px, 9999px, 61px, 0); }
+    25% { clip: rect(14px, 9999px, 79px, 0); }
+    30% { clip: rect(1px, 9999px, 66px, 0); }
+    35% { clip: rect(86px, 9999px, 30px, 0); }
+    40% { clip: rect(23px, 9999px, 98px, 0); }
+    45% { clip: rect(85px, 9999px, 72px, 0); }
+    50% { clip: rect(71px, 9999px, 75px, 0); }
+    55% { clip: rect(2px, 9999px, 48px, 0); }
+    60% { clip: rect(30px, 9999px, 16px, 0); }
+    65% { clip: rect(59px, 9999px, 50px, 0); }
+    70% { clip: rect(41px, 9999px, 62px, 0); }
+    75% { clip: rect(2px, 9999px, 82px, 0); }
+    80% { clip: rect(47px, 9999px, 73px, 0); }
+    85% { clip: rect(3px, 9999px, 27px, 0); }
+    90% { clip: rect(26px, 9999px, 55px, 0); }
+    95% { clip: rect(42px, 9999px, 97px, 0); }
+    100% { clip: rect(38px, 9999px, 49px, 0); }
+}
+
+@keyframes scanlines {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(10px); }
+}
+
+@keyframes gridPulse {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 0.4; }
+}
+
+@keyframes pulse {
+    0%, 100% { 
+        opacity: 0.5;
+        transform: scale(1);
+    }
+    50% { 
+        opacity: 1;
+        transform: scale(1.2);
+    }
+}
+
+@keyframes neonFlicker {
+    0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+        text-shadow: 
+            0 0 10px var(--neon-cyan),
+            0 0 20px var(--neon-cyan),
+            0 0 30px var(--neon-magenta);
+    }
+    20%, 24%, 55% {        
+        text-shadow: none;
+    }
+}
+
+/* ========================================
+   12. SPECIAL EFFECTS & ACCENTS
+   ======================================== */
+.stAlert, .stSuccess, .stWarning, .stError, .stInfo {
+    border-left: 4px solid var(--neon-cyan);
+    background: rgba(0, 255, 255, 0.05);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+}
+
+.stProgress > div > div {
+    background: linear-gradient(90deg, var(--neon-cyan), var(--neon-magenta));
+    box-shadow: 0 0 10px var(--neon-cyan);
+}
+
+/* Code blocks */
+code, pre {
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid var(--neon-green);
+    color: var(--neon-green);
+    padding: 2px 6px;
+    font-family: 'Courier New', monospace;
+    box-shadow: 0 0 5px rgba(57, 255, 20, 0.3);
+}
+
+/* Spinner/Loader */
+.stSpinner > div {
+    border-color: var(--neon-cyan) transparent transparent transparent;
+}
+
+/* Metrics */
+[data-testid="stMetricValue"] {
+    color: var(--neon-cyan);
+    text-shadow: 0 0 10px var(--neon-cyan);
+    font-size: 2rem;
+    font-weight: bold;
 }

@@ -1,5 +1,5 @@
 import streamlit as st
-import requests
+from util import local_css
 
 PASS = "rentang@uyee"
 
@@ -21,6 +21,7 @@ def check_auth():
             st.rerun()
         else:
             st.error("❌ Password salah")
+    # local_css("cyberpunk.css")
     return st.session_state.get("logged_in", False)
 
 
