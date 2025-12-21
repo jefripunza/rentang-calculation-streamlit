@@ -1,0 +1,47 @@
+/* Center Logo */
+[data-testid="stElementContainer"] div {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Success/Error messages */
+.stSuccess,
+.stError,
+.stWarning,
+.stInfo {
+  border-radius: 10px !important;
+  padding: 15px !important;
+}
+
+/* Hide streamlit branding */
+[data-testid="stSidebarHeader"] {
+  visibility: hidden;
+}
+#MainMenu {
+  visibility: hidden;
+}
+footer {
+  visibility: hidden;
+}
+header {
+  visibility: hidden;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}

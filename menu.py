@@ -3,7 +3,8 @@ import streamlit as st
 from util import local_css
 
 def render_sidebar():
-    # local_css("cyberpunk.css")
+    local_css("style.css")
+    st.sidebar.image("img/pu-logo.png", width=150)
     st.sidebar.header("📌 Main Menu")
 
     # Home / Introduction
@@ -24,11 +25,11 @@ def render_sidebar():
     )
     st.sidebar.page_link(
         "pages/pages3_BranchArea_Calc.py",
-        label="3️⃣ Branch Area Calc"
+        label="3️⃣ Branch Area Calculation"
     )
     st.sidebar.page_link(
         "pages/pages4_Water_Requirement_Calculation.py",
-        label="4️⃣ Water Requirement Calc"
+        label="4️⃣ Water Requirement Calculation"
     )
     st.sidebar.page_link(
         "pages/pages5_Qp_Adjustment.py",
