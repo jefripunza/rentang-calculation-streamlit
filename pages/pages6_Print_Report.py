@@ -10,6 +10,7 @@ import altair as alt
 from auth import check_auth
 from menu import render_sidebar
 
+from typing import Optional
 # ========================================
 # ===== Autentikasi Basic Auth ===========
 # ========================================
@@ -191,7 +192,7 @@ def build_mt_start_map_from_page2() -> dict[tuple[str, int, str], int]:
     return mt_start_map
 
 
-def _five_day_id_to_date_from_base(base_date: dt.date, id_5d: int) -> dt.date | None:
+def _five_day_id_to_date_from_base(base_date: dt.date, id_5d: int) -> Optional[dt.date]:
     """
     5Day_ID (1..72) を、base_date と同じ water-year 上の日付に変換する。
     11,12月 → water-year 開始年、それ以外 → 開始年+1年。
@@ -312,7 +313,7 @@ for col in ["Bank", "Canal", "ParentName", "ChildName"]:
 
 def _get_reach_row(
     df_source: pd.DataFrame, bank: str, canal: str, parent_name: str, child_name: str
-) -> pd.Series | None:
+) -> Optional[pd.Series]:
     mask = (
         df_source["Bank"].astype(str).str.strip().eq(bank)
         & df_source["Canal"].astype(str).str.strip().eq(canal)
@@ -327,12 +328,12 @@ def _get_reach_row(
 
 def _build_5day_qp_pair(
     df_base: pd.DataFrame,
-    df_case: pd.DataFrame | None,
+    df_case: Optional[pd.DataFrame],
     bank: str,
     canal: str,
     parent_name: str,
     child_name: str,
-) -> pd.DataFrame | None:
+) -> Optional[pd.DataFrame]:
     row_base = _get_reach_row(df_base, bank, canal, parent_name, child_name)
     if row_base is None:
         return None
@@ -365,7 +366,7 @@ def _build_5day_qp_pair(
     return pd.DataFrame(records)
 
 
-def render_5day_qp_bar_with_cards(df_5day: pd.DataFrame | None, title: str) -> None:
+def render_5day_qp_bar_with_cards(df_5day: Optional[pd.DataFrame], title: str) -> None:
     if df_5day is None or df_5day.empty:
         st.write(f"(no data for {title})")
         return
@@ -452,7 +453,7 @@ def render_5day_qp_bar_with_cards(df_5day: pd.DataFrame | None, title: str) -> N
         )
         .properties(title=title, width=650, height=260)
     )
-    st.altair_chart(chart, width="stretch")
+    st.altair_chart(chart, use_container_width=True)
 
     card_left, card_right = st.columns(2)
 
@@ -560,10 +561,10 @@ from copy import deepcopy
 # =========
 
 def render_annual_summary_and_detail_block(
-    left_5day: pd.DataFrame | None,
-    right_5day: pd.DataFrame | None,
-    df_case_disp: pd.DataFrame | None,
-    mt_start_labels: set[str] | None,
+    left_5day: Optional[pd.DataFrame],
+    right_5day: Optional[pd.DataFrame],
+    df_case_disp: Optional[pd.DataFrame],
+    mt_start_labels: Optional[set[str]],
     bank_sel: str,
     sec_name: str,
     gol_sel: int,
@@ -580,7 +581,7 @@ def render_annual_summary_and_detail_block(
     months_num = water_month_order[:]              # [11,12,1,...,10]
     months_abbr = [calendar.month_abbr[m] for m in months_num]
 
-    def _monthly_stats(df_5day_single: pd.DataFrame | None, col_name: str):
+    def _monthly_stats(df_5day_single: Optional[pd.DataFrame], col_name: str):
         """月別 max(Q) [m³/s] と volume [million m³] を返す。"""
         qmax = {m: np.nan for m in months_num}
         vol  = {m: 0.0     for m in months_num}
@@ -1544,9 +1545,9 @@ def _style_adjusted_schedule_table(
     adj_index_map = _build_adjusted_mt_index_map()
 
     # 行ごとの MT-1/2/3 Adjusted index を計算
-    mt1_idx_rows: list[int | None] = []
-    mt2_idx_rows: list[int | None] = []
-    mt3_idx_rows: list[int | None] = []
+    mt1_idx_rows: list[Optional[int]] = []
+    mt2_idx_rows: list[Optional[int]] = []
+    mt3_idx_rows: list[Optional[int]] = []
 
     for _, row in df_sched.iterrows():
         areas = [
@@ -1561,7 +1562,7 @@ def _style_adjusted_schedule_table(
         if not gol_candidates:
             gol_candidates = [1, 2, 3]
 
-        def _earliest(season: str) -> int | None:
+        def _earliest(season: str) -> Optional[int]:
             idx_list: list[int] = []
             for g in gol_candidates:
                 idx = adj_index_map.get((bank, g, season), None)
@@ -2115,7 +2116,7 @@ def make_schedule_excel() -> bytes:
             # Bank×Golongan×Season → Adjusted 5Day index のマップ
             adj_index_map = _build_adjusted_mt_index_map()
 
-            def _gol_from_str(s: str) -> int | None:
+            def _gol_from_str(s: str) -> Optional[int]:
                 # 修正: r"\d+" -> r"(\d+)" に変更して group(1) が使えるようにしました
                 m = re.search(r"(\d+)", str(s))
                 return int(m.group(1)) if m else None

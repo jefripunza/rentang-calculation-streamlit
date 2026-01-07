@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Optional
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -123,13 +124,13 @@ thiessen_path = CSV_DIR / "Thiessen.csv"
 def render_table(
     df: pd.DataFrame,
     header_bg: str = "#e5f0ff",
-    caption: str | None = None,
+    caption: Optional[str] = None,
     header_font_size: str = "12px",
-    header_min_width: str | None = None,
-    header_max_width: str | None = None,
+    header_min_width: Optional[str] = None,
+    header_max_width: Optional[str] = None,
     header_white_space: str = "nowrap",
-    number_format: str | None = None,    # 数値書式（任意）
-    max_height_px: int | None = None,    # 縦の最大高さ（px, 任意）
+    number_format: Optional[str] = None,    # 数値書式（任意）
+    max_height_px: Optional[int] = None,    # 縦の最大高さ（px, 任意）
     sticky_first_data_row: bool = False, # ★ 追加：最初のデータ行も固定するかどうか
 ):
     if caption:

@@ -6,6 +6,7 @@ import streamlit as st
 from auth import check_auth
 from menu import render_sidebar
 
+from typing import Optional
 # ========================================
 # ===== Autentikasi Basic Auth ===========
 # ========================================
@@ -27,7 +28,7 @@ AUDIO_DIR = BASE_DIR / "audio" # [Added] Folder for audio files (create if neces
 st.set_page_config(page_title="Irrigation Tool", layout="wide")
 
 # ---------- Common: table renderer with borders & 1-based row index ----------
-# def render_table(df: pd.DataFrame, header_bg: str = "#e5f0ff", caption: str | None = None):
+# def render_table(df: pd.DataFrame, header_bg: str = "#e5f0ff", caption: Optional[str] = None):
 #     if caption:
 #         st.caption(caption)
 #     if df is None or df.empty:

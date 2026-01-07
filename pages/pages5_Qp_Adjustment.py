@@ -10,6 +10,7 @@ import altair as alt
 from auth import check_auth
 from menu import render_sidebar
 
+from typing import Optional
 # ========================================
 # ===== Autentikasi Basic Auth ===========
 # ========================================
@@ -17,7 +18,7 @@ if not check_auth():
     st.stop()
 render_sidebar()
 
-def _parse_golongan_no_simple(g) -> int | None:
+def _parse_golongan_no_simple(g) -> Optional[int]:
     """文字列から Golongan 番号（1/2/3）だけを取り出す簡易関数。"""
     s = str(g).strip()
     if not s or s.lower() == "nan":
@@ -36,8 +37,8 @@ def _parse_golongan_no_simple(g) -> int | None:
 def render_simple_table(
     df: pd.DataFrame,
     header_bg: str = "#e5f0ff",
-    caption: str | None = None,
-    col_width: str | None = None,
+    caption: Optional[str] = None,
+    col_width: Optional[str] = None,
     row_highlight=None,
 ) -> None:
     """
@@ -107,7 +108,7 @@ def render_simple_table(
 def render_adjusted_qp_table(
     df: pd.DataFrame,
     mt_start_labels: set[str],
-    caption: str | None = None,
+    caption: Optional[str] = None,
 ) -> None:
     """
     Adjusted Qp シナリオ用のテーブル描画（3番の見た目に揃えた版）。
@@ -308,7 +309,7 @@ def render_adjusted_qp_table(
     )
 
 
-def recompute_nfr_5day_for_landprep(landprep_case: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame] | None:
+def recompute_nfr_5day_for_landprep(landprep_case: pd.DataFrame) -> Optional[tuple[pd.DataFrame, pd.DataFrame]]:
     """
     Recompute NFR 5-day table (Bank, Golongan, Group, Season, Month, Step, NFR[L/s/ha])
     from a given land-preparation schedule (landprep_case).
@@ -1025,7 +1026,7 @@ def date_to_5day_id(d: dt.date) -> int:
 
     return m_idx * 6 + step  # 1..72
 
-def _five_day_id_to_date_from_base(base_date: dt.date, id_5d: int) -> dt.date | None:
+def _five_day_id_to_date_from_base(base_date: dt.date, id_5d: int) -> Optional[dt.date]:
     """
     5Day_ID (1..72) を、base_date と同じ water-year 上の日付に変換する。
 
@@ -1363,7 +1364,7 @@ def build_canal_edges(df: pd.DataFrame) -> pd.DataFrame:
 def compute_qp_from_nfr_for_df(
     df_net: pd.DataFrame,
     nfr_arr: dict[str, dict[int, np.ndarray]],
-    eff_map_raw: dict[str, float] | None,
+    eff_map_raw: Optional[dict[str, float]],
 ) -> pd.DataFrame:
     """
     Page4 の Qp 計算ロジックと同じことを、
@@ -1795,7 +1796,7 @@ def build_summary_for_canal(
     return summary
 
 def _get_reach_row(df_source: pd.DataFrame, bank: str, canal: str,
-                   parent_name: str, child_name: str) -> pd.Series | None:
+                   parent_name: str, child_name: str) -> Optional[pd.Series]:
     """Bank / Canal / ParentName / ChildName で 1 行を特定（存在しなければ None）。"""
     mask = (
         df_source["Bank"].astype(str).str.strip().eq(bank) &
@@ -1811,12 +1812,12 @@ def _get_reach_row(df_source: pd.DataFrame, bank: str, canal: str,
 
 def _build_5day_qp_pair(
     df_base: pd.DataFrame,
-    df_case: pd.DataFrame | None,
+    df_case: Optional[pd.DataFrame],
     bank: str,
     canal: str,
     parent_name: str,
     child_name: str,
-) -> pd.DataFrame | None:
+) -> Optional[pd.DataFrame]:
     """
     指定した 1 reach について、5日ごとの Qp（Planned / Adjusted）を作る。
 
@@ -1859,7 +1860,7 @@ def _build_5day_qp_pair(
 
     return pd.DataFrame(records)
 
-def render_5day_qp_bar_with_cards(df_5day: pd.DataFrame | None, title: str) -> None:
+def render_5day_qp_bar_with_cards(df_5day: Optional[pd.DataFrame], title: str) -> None:
     """
     5日ごとの Qp (Planned / Adjusted) を棒グラフで描き、
     下に Max 値 (m³/s) と積算量 Sum (百万 m³) をカード風に表示する。
@@ -1982,7 +1983,7 @@ def render_5day_qp_bar_with_cards(df_5day: pd.DataFrame | None, title: str) -> N
     )
 
     # Streamlit v1.41 以降は width を使う
-    st.altair_chart(chart, width="stretch")
+    st.altair_chart(chart, use_container_width=True)
 
     # ---- 下にカード風の Max / Sum 情報 ----
     card_left, card_right = st.columns(2)
@@ -2078,10 +2079,10 @@ def render_5day_qp_bar_with_cards(df_5day: pd.DataFrame | None, title: str) -> N
 
 
 def render_annual_summary_and_detail_block(
-    left_5day: pd.DataFrame | None,
-    right_5day: pd.DataFrame | None,
-    df_case_disp: pd.DataFrame | None,
-    mt_start_labels: set[str] | None,
+    left_5day: Optional[pd.DataFrame],
+    right_5day: Optional[pd.DataFrame],
+    df_case_disp: Optional[pd.DataFrame],
+    mt_start_labels: Optional[set[str]],
     bank_sel: str,
     sec_name: str,
     gol_sel: int,
@@ -2107,7 +2108,7 @@ def render_annual_summary_and_detail_block(
     months_num = water_month_order[:]              # [11,12,1,...,10]
     months_abbr = [calendar.month_abbr[m] for m in months_num]
 
-    def _monthly_stats(df_5day_single: pd.DataFrame | None, col_name: str):
+    def _monthly_stats(df_5day_single: Optional[pd.DataFrame], col_name: str):
         """月別 max(Q) [m³/s] と volume [million m³] を返す。"""
         qmax = {m: np.nan for m in months_num}
         vol  = {m: 0.0     for m in months_num}
@@ -2553,7 +2554,7 @@ def render_main_adjusted_table(
     selected_canal: str,
     display_cols: list[str],
     show_golongan: bool,
-    mt_start_labels: set[str] | None = None,
+    mt_start_labels: Optional[set[str]] = None,
 ) -> None:
     """
     Section 4 のメインテーブル（Adjusted Qp, m³/s）を描画する。
@@ -2631,7 +2632,7 @@ def render_main_adjusted_table(
 
 
 def _get_reach_row(df_source: pd.DataFrame, bank: str, canal: str,
-                   parent_name: str, child_name: str) -> pd.Series | None:
+                   parent_name: str, child_name: str) -> Optional[pd.Series]:
     """Bank / Canal / ParentName / ChildName で 1 行を特定（存在しなければ None）。"""
     mask = (
         df_source["Bank"].astype(str).str.strip().eq(bank) &
@@ -2652,7 +2653,7 @@ def _build_monthly_qp_for_reach(
     parent_name: str,
     child_name: str,
     unit_scale: float,
-) -> pd.DataFrame | None:
+) -> Optional[pd.DataFrame]:
     """
     指定した 1 つの reach について、Month ごとの平均 Qp を計算する。
       unit_scale: 1.0 → そのまま, 1/1000 → L/s → m³/s 変換など
@@ -2687,12 +2688,12 @@ def _build_monthly_qp_for_reach(
 
 def _build_monthly_qp_pair(
     df_base: pd.DataFrame,
-    df_case: pd.DataFrame | None,
+    df_case: Optional[pd.DataFrame],
     bank: str,
     canal: str,
     parent_name: str,
     child_name: str,
-) -> pd.DataFrame | None:
+) -> Optional[pd.DataFrame]:
     """
     同じ reach について、Planned Qp と Adjusted Qp の Month 別データを作る。
     戻り値: ["MonthAbbr","Qp_planned","Qp_adjusted"]
@@ -2792,7 +2793,7 @@ def compute_mt_start_labels_for_scenario(
 
 
 
-def render_monthly_qp_bar(df_month: pd.DataFrame | None, title: str) -> None:
+def render_monthly_qp_bar(df_month: Optional[pd.DataFrame], title: str) -> None:
     """Month 別 Qp（Planned / Adjusted）の棒グラフを 1 つ描画。"""
     if df_month is None or df_month.empty:
         st.write(f"(no data for {title})")
@@ -2838,7 +2839,7 @@ def render_monthly_qp_bar(df_month: pd.DataFrame | None, title: str) -> None:
         )
     )
     # ★ use_container_width → width="stretch"
-    st.altair_chart(chart, width="stretch")
+    st.altair_chart(chart, use_container_width=True)
 
 
 
@@ -2866,12 +2867,12 @@ if summary.empty:
 #   If no Area_G* > 0, fallback to all Golongan 1–3 at Bank level.
 mt_start_map = build_mt_start_map_from_page2()
 
-mt1_idx_rows: list[int | None] = []
-mt2_idx_rows: list[int | None] = []
-mt3_idx_rows: list[int | None] = []
+mt1_idx_rows: list[Optional[int]] = []
+mt2_idx_rows: list[Optional[int]] = []
+mt3_idx_rows: list[Optional[int]] = []
 
 
-def earliest_idx_for_mt(bank: str, season: str, gol_candidates: list[int]) -> int | None:
+def earliest_idx_for_mt(bank: str, season: str, gol_candidates: list[int]) -> Optional[int]:
     """Return the minimum 5Day index for the given Bank / Season among gol_candidates."""
     idx_list: list[int] = []
     for g in gol_candidates:
@@ -3991,8 +3992,8 @@ with st.expander("6. Detail of NFR calculation result (per Secondary Canal)", ex
     """)
 
     # ★ ここを追加 ★
-    df_case_disp: pd.DataFrame | None = None
-    mt_start_labels: set[str] | None = None
+    df_case_disp: Optional[pd.DataFrame] = None
+    mt_start_labels: Optional[set[str]] = None
 
     # Canal start settings and base land-prep
     sec_cfg_all   = st.session_state.get("sec_start_config", None)
@@ -4358,7 +4359,7 @@ with st.expander("6. Detail of NFR calculation result (per Secondary Canal)", ex
                                 return ""
                             return f"{v:.3f}"
 
-                        def style_vertical(df_v: pd.DataFrame, start_ms: tuple[int | None, int | None]):
+                        def style_vertical(df_v: pd.DataFrame, start_ms: tuple[Optional[int], Optional[int]]):
                             start_month, start_step = start_ms
 
                             def _highlight(row: pd.Series):

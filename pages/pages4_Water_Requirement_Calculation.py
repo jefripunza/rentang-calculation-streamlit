@@ -12,6 +12,7 @@ import streamlit as st
 from auth import check_auth
 from menu import render_sidebar
 
+from typing import Optional
 # ========================================
 # ===== Autentikasi Basic Auth ===========
 # ========================================
@@ -99,7 +100,7 @@ CSV_DIR = BASE_DIR / "csv"
 IS_LOCAL = (BASE_DIR / ".local_write").exists()
 
 # ---------- 共通：小さめ・罫線付きテーブル描画 ----------
-def render_simple_table(df: pd.DataFrame, header_bg: str = "#e5f0ff", caption: str | None = None):
+def render_simple_table(df: pd.DataFrame, header_bg: str = "#e5f0ff", caption: Optional[str] = None):
     if caption:
         st.caption(caption)
     if df is None or df.empty:
@@ -1037,7 +1038,7 @@ def build_mt_start_map_from_page2() -> dict[tuple[str, int, str], int]:
 mt_start_map = build_mt_start_map_from_page2()
 
 
-def earliest_idx_for_mt(bank: str, season: str, gol_candidates: list[int]) -> int | None:
+def earliest_idx_for_mt(bank: str, season: str, gol_candidates: list[int]) -> Optional[int]:
     """For a given Bank / Season, return the earliest 5Day index among the candidate Golongan."""
     idx_list: list[int] = []
     for g in gol_candidates:
@@ -1240,9 +1241,9 @@ if "Class" in summary.columns:
         summary = summary[summary["Class"].isin(["TB", "Division"])]
 
 # === Per-row MT-1 / MT-2 / MT-3 start indices ===
-mt1_idx_rows: list[int | None] = []
-mt2_idx_rows: list[int | None] = []
-mt3_idx_rows: list[int | None] = []
+mt1_idx_rows: list[Optional[int]] = []
+mt2_idx_rows: list[Optional[int]] = []
+mt3_idx_rows: list[Optional[int]] = []
 
 for _, r in summary.iterrows():
     bank = r["Bank"]
@@ -1339,9 +1340,9 @@ def highlight_qp(row: pd.Series) -> list[str]:
 
 def style_qp(
     df_sty: pd.DataFrame,
-    mt1_idx_rows: list[int | None],
-    mt2_idx_rows: list[int | None],
-    mt3_idx_rows: list[int | None],
+    mt1_idx_rows: list[Optional[int]],
+    mt2_idx_rows: list[Optional[int]],
+    mt3_idx_rows: list[Optional[int]],
 ):
     cols = set(df_sty.columns)
 
