@@ -1,6 +1,7 @@
 import streamlit as st
 from util import local_css
 import requests
+from environment import host_dss_url
 
 def check_auth():
     local_css("style.css")
@@ -16,10 +17,19 @@ def check_auth():
         password = st.text_input("Password", type="password", key="auth_password", value=default_pass)
         if st.button("Login"):
             # nembah DSS
-            if password == PASS:
-                st.session_state["logged_in"] = True
-                st.rerun()
-            else:
-                st.error("❌ Password salah")
+            try:
+                response = requests.get(host_dss_url + "/api/process/session/" + password)
+                if response.status_code == 200:
+                    resp = response.json()
+                    # response: data.is_connected
+                    if resp.get("data", {}).get("is_connected", False):
+                        st.session_state["logged_in"] = True
+                        st.rerun()
+                    else:
+                        st.error("❌ Password salah")
+                else:
+                    st.error("❌ Password salah")
+            except Exception as e:
+                st.error(f"❌ Gagal menghubungi server: {e}")
         return False
     return True
