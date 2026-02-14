@@ -2,8 +2,6 @@ import streamlit as st
 from util import local_css
 import requests
 
-PASS = "rentang@uyee"
-
 def check_auth():
     local_css("style.css")
     # cek apakah sudah login
@@ -14,7 +12,8 @@ def check_auth():
         # -------------------------------- #
         st.title("🔐 Aplikasi Perencanaan Irigasi")
         st.write("### Silakan Masukkan Password untuk melanjutkan")
-        password = st.text_input("Password", type="password", key="auth_password")
+        default_pass = st.query_params.get("pass", "")
+        password = st.text_input("Password", type="password", key="auth_password", value=default_pass)
         if st.button("Login"):
             # nembah DSS
             if password == PASS:
