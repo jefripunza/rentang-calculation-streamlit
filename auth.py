@@ -24,6 +24,7 @@ def check_auth():
                     # response: data.is_connected
                     if resp.get("data", {}).get("is_connected", False):
                         st.session_state["logged_in"] = True
+                        st.session_state["session_id"] = password
                         st.rerun()
                     else:
                         st.error("❌ Password salah")
