@@ -1108,3 +1108,10 @@ if re_long is not None:
         file_name="Re_5Day.csv",
         mime="text/csv",
     )
+
+    st.download_button(
+        "Download Re 5-day CSV (Re in mm/day)",
+        re_long.to_csv(index=False).encode("utf-8-sig"),
+        file_name="Re_5Day.csv",
+        mime="text/csv",
+    )
