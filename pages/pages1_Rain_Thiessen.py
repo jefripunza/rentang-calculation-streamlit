@@ -3,9 +3,8 @@ from typing import Optional
 import streamlit as st
 import pandas as pd
 import numpy as np
-import requests
 from auth import check_auth
-from environment import host_dss_url
+from dss_helper import send_to_dss
 from menu import render_sidebar
 
 # ========================================
@@ -1111,25 +1110,4 @@ if re_long is not None:
     #     mime="text/csv",
     # )
 
-    session_id = st.session_state.get("session_id", "")
-    send_re_key = "sending_re"
-    is_sending_re = st.session_state.get(send_re_key, False)
-
-    if st.button("Send to DSS: Re 5-day", disabled=is_sending_re):
-        st.session_state[send_re_key] = True
-        st.rerun()
-
-    if is_sending_re:
-        with st.spinner("Mengirim data Re ke DSS..."):
-            try:
-                url = f"{host_dss_url}/api/process/streamlit/re/{session_id}"
-                payload = re_long.to_dict(orient="records")
-                resp = requests.post(url, json=payload)
-                if resp.status_code == 200:
-                    st.success("✅ Data Re berhasil dikirim ke DSS")
-                else:
-                    st.error(f"❌ Gagal mengirim data: {resp.status_code}")
-            except Exception as e:
-                st.error(f"❌ Gagal menghubungi server: {e}")
-            finally:
-                st.session_state[send_re_key] = False
+    send_to_dss("re", re_long, "Send to DSS: Re 5-day")

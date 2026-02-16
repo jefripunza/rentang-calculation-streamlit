@@ -6,6 +6,7 @@ import pandas as pd
 import streamlit as st
 import numpy as np
 from auth import check_auth
+from dss_helper import send_to_dss
 from menu import render_sidebar
 
 # ========================================
@@ -2223,10 +2224,13 @@ else:
 
     st.session_state["nfr_5day"] = nfr_long
 
-    csv_bytes = nfr_long.to_csv(index=False).encode("utf-8-sig")
-    st.download_button(
-        "Download NFR 5-day CSV (NFR in L/s/ha)",
-        csv_bytes,
-        file_name="NFR_5Day.csv",
-        mime="text/csv",
-    )
+    # ---- ローカル／Cloud 共通：ダウンロードボタン ----
+    # csv_bytes = nfr_long.to_csv(index=False).encode("utf-8-sig")
+    # st.download_button(
+    #     "Download NFR 5-day CSV (NFR in L/s/ha)",
+    #     csv_bytes,
+    #     file_name="NFR_5Day.csv",
+    #     mime="text/csv",
+    # )
+
+    send_to_dss("nfr", nfr_long, "Send to DSS: NFR 5-day")
