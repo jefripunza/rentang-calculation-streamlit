@@ -9,6 +9,7 @@ import streamlit as st
 import altair as alt
 from auth import check_auth
 from menu import render_sidebar
+from dss_helper import send_to_dss
 
 from typing import Optional
 # ========================================
@@ -1937,12 +1938,13 @@ def make_conditions_excel() -> bytes:
 
 
 st.markdown("#### Export tables to Excel", unsafe_allow_html=True)
-st.download_button(
-    "Download Conditions (Excel)",
-    data=make_conditions_excel(),
-    file_name="Qp_Conditions.xlsx",
-    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-)
+# st.download_button(
+#     "Download Conditions (Excel)",
+#     data=make_conditions_excel(),
+#     file_name="Qp_Conditions.xlsx",
+#     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+# )
+send_to_dss("qp_conditions", make_conditions_excel(), "Send to DSS: Qp Conditions")
 
 def make_schedule_excel() -> bytes:
     """
@@ -2215,9 +2217,10 @@ def make_schedule_excel() -> bytes:
     return output.getvalue()
 
 
-st.download_button(
-    "Download Adjusted schedule (Excel)",
-    data=make_schedule_excel(),
-    file_name="Qp_AdjustedSchedule.xlsx",
-    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-)
+# st.download_button(
+#     "Download Adjusted schedule (Excel)",
+#     data=make_schedule_excel(),
+#     file_name="Qp_AdjustedSchedule.xlsx",
+#     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+# )
+send_to_dss("qp_adjusted_schedule", make_schedule_excel(), "Send to DSS: Qp Adjusted Schedule")

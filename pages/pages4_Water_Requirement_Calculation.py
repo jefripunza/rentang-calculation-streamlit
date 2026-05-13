@@ -11,6 +11,7 @@ import pandas as pd
 import streamlit as st
 from auth import check_auth
 from menu import render_sidebar
+from dss_helper import send_to_dss
 
 from typing import Optional
 # ========================================
@@ -1548,10 +1549,13 @@ export_df.to_csv(csv_path, index=False, encoding="utf-8-sig")
 # ★ ダウンロード用（これはクライアントPCのダウンロードフォルダに落ちる）
 csv_bytes = export_df.to_csv(index=False).encode("utf-8-sig")
 csv_name = "Qp_all_reaches_m3s.csv"
-st.download_button(
-    "Download Qp CSV (all reaches, m³/s)",
-    csv_bytes,
-    file_name=csv_name,
-    mime="text/csv",
-)
+
+send_to_dss("qp", csv_bytes, "Send to DSS: Qp all reaches m3s")
+
+# st.download_button(
+#     "Download Qp CSV (all reaches, m³/s)",
+#     csv_bytes,
+#     file_name=csv_name,
+#     mime="text/csv",
+# )
 
