@@ -1944,7 +1944,7 @@ st.markdown("#### Export tables to Excel", unsafe_allow_html=True)
 #     file_name="Qp_Conditions.xlsx",
 #     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 # )
-send_to_dss("qp_conditions", make_conditions_excel(), "Send to DSS: Qp Conditions")
+send_to_dss("qp_condition", make_conditions_excel(), "Send to DSS: Qp Conditions")
 
 def make_schedule_excel() -> bytes:
     """
