@@ -1550,7 +1550,7 @@ export_df.to_csv(csv_path, index=False, encoding="utf-8-sig")
 csv_bytes = export_df.to_csv(index=False).encode("utf-8-sig")
 csv_name = "Qp_all_reaches_m3s.csv"
 
-send_to_dss("qp", csv_bytes, "Send to DSS: Qp all reaches m3s")
+send_to_dss("qp", export_df, "Send to DSS: Qp all reaches m3s")
 
 # st.download_button(
 #     "Download Qp CSV (all reaches, m³/s)",

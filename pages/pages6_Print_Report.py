@@ -1938,13 +1938,29 @@ def make_conditions_excel() -> bytes:
 
 
 st.markdown("#### Export tables to Excel", unsafe_allow_html=True)
+
+def get_conditions_df() -> pd.DataFrame:
+    sec_cfg_all = st.session_state.get("sec_start_config", None)
+    if sec_cfg_all is None or sec_cfg_all.empty:
+        return pd.DataFrame()
+
+    left_tbl  = _build_report_condition_table_for_bank("Left")
+    right_tbl = _build_report_condition_table_for_bank("Right")
+    
+    if not left_tbl.empty:
+        left_tbl["Bank"] = "Left"
+    if not right_tbl.empty:
+        right_tbl["Bank"] = "Right"
+
+    return pd.concat([left_tbl, right_tbl], ignore_index=True)
+
 # st.download_button(
 #     "Download Conditions (Excel)",
 #     data=make_conditions_excel(),
 #     file_name="Qp_Conditions.xlsx",
 #     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 # )
-send_to_dss("qp_condition", make_conditions_excel(), "Send to DSS: Qp Conditions")
+send_to_dss("qp_condition", get_conditions_df(), "Send to DSS: Qp Conditions")
 
 def make_schedule_excel() -> bytes:
     """
@@ -2217,10 +2233,22 @@ def make_schedule_excel() -> bytes:
     return output.getvalue()
 
 
+def get_adjusted_schedule_df() -> pd.DataFrame:
+    df_case = st.session_state.get("qp_df_network_case", None)
+    if df_case is None or df_case.empty:
+        return pd.DataFrame()
+        
+    df_export = df_case.copy()
+    for lab in ordered_labels:
+        if lab in df_export.columns:
+            df_export[lab] = pd.to_numeric(df_export[lab], errors="coerce").fillna(0.0) / 1000.0
+            
+    return df_export
+
 # st.download_button(
 #     "Download Adjusted schedule (Excel)",
 #     data=make_schedule_excel(),
 #     file_name="Qp_AdjustedSchedule.xlsx",
 #     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 # )
-send_to_dss("qp_adjusted_schedule", make_schedule_excel(), "Send to DSS: Qp Adjusted Schedule")
+send_to_dss("qp_adjusted_schedule", get_adjusted_schedule_df(), "Send to DSS: Qp Adjusted Schedule")

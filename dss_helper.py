@@ -4,13 +4,16 @@ import requests
 from environment import host_dss_url
 
 
-def send_to_dss(context: str, dataframe, button_label: str = "Send to DSS"):
+import json
+import pandas as pd
+
+def send_to_dss(context: str, data, button_label: str = "Send to DSS"):
     """
-    Reusable function to send dataframe to DSS API with loading state.
+    Reusable function to send data (DataFrame or list of dicts) to DSS API with loading state.
     
     Args:
         context: Context name for the API endpoint (e.g., 're', 'nfr')
-        dataframe: Pandas DataFrame to send
+        data: Pandas DataFrame or list of dicts to send
         button_label: Custom button label (default: "Send to DSS")
     """
     session_id = st.session_state.get("session_id", "")
@@ -25,12 +28,19 @@ def send_to_dss(context: str, dataframe, button_label: str = "Send to DSS"):
         with st.spinner(f"Mengirim data {context.upper()} ke DSS..."):
             try:
                 url = f"{host_dss_url}/api/process/streamlit/{context}/{session_id}"
-                payload = dataframe.to_dict(orient="records")
+                
+                # Convert to JSON-compliant list of dicts
+                if isinstance(data, pd.DataFrame):
+                    payload = json.loads(data.to_json(orient="records", double_precision=15))
+                else:
+                    payload = data
+                
                 resp = requests.post(url, json=payload)
                 if resp.status_code == 200:
                     st.success(f"✅ Data {context.upper()} berhasil dikirim ke DSS")
                 else:
                     st.error(f"❌ Gagal mengirim data: {resp.status_code}")
+                    st.error(f"🧠 Response: {resp.text}")
             except Exception as e:
                 st.error(f"❌ Gagal menghubungi server: {e}")
             finally:
